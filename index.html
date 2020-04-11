@@ -64,10 +64,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-Win10-Hexo-搭建个人博客" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Win10  Hexo 搭建个人博客" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2020/04/01/Win10-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" class="article-date">
-  <time datetime="2020-03-31T17:00:05.736Z" itemprop="datePublished">2020-04-01</time>
+    <a href="/2020/04/11/Win10%20%20Hexo%20%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" class="article-date">
+  <time datetime="2020-04-11T12:03:14.688Z" itemprop="datePublished">2020-04-11</time>
 </a>
     
   </div>
@@ -78,7 +78,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/01/Win10-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">Win10 GitHub Hexo 搭建个人博客</a>
+      <a class="article-title" href="/2020/04/11/Win10%20%20Hexo%20%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">Win10 GitHub Hexo 搭建个人博客</a>
     </h1>
   
 
@@ -86,9 +86,9 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Win10-GitHub-Hexo-搭建个人博客"><a href="#Win10-GitHub-Hexo-搭建个人博客" class="headerlink" title="Win10 GitHub Hexo 搭建个人博客"></a>Win10 GitHub Hexo 搭建个人博客</h1><p>[TOC]</p>
+        <p>[TOC]</p>
 <hr>
-<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<h1 id="Win10-GitHub-Hexo-搭建个人博客"><a href="#Win10-GitHub-Hexo-搭建个人博客" class="headerlink" title="Win10 GitHub Hexo 搭建个人博客"></a>Win10 GitHub Hexo 搭建个人博客</h1><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
 <li>git    2.26.0</li>
 <li>node.js    12.16.1</li>
 <li>npm    6.13.4</li>
@@ -173,23 +173,48 @@
 <hr>
 </li>
 </ol>
-<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><ul>
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><h3 id="配置SSH"><a href="#配置SSH" class="headerlink" title="配置SSH"></a>配置SSH</h3><ol>
+<li><p>发现使用<code>http</code>部署，在上传时往往需要重新输入 Github 账号密码，而使用 SSH 配置则不需要，且更稳定。以下是具体步骤</p>
+</li>
+<li><p>开启 <code>git bash</code> 进入 <code>blog</code> 目录，执行 <code>git init</code> 初始化</p>
+</li>
+<li><p>执行<code>ssh-keygen -t rsa -C &quot;&lt;emailAddress（注册所用邮箱名）&gt;&quot;</code>可在系统用户目录创建隐藏<code>.ssh</code>文件夹，回车默认设置即可。完成后<code>.ssh</code>文件夹中有<code>id_rsa</code>和<code>id_rsa.pub</code>文件，其中<code>.pub</code>是公钥。如果已经存在这些文件，跳过该步骤</p>
+<p> <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411192808.png" alt=""></p>
+</li>
+<li><p>在 GitHub 账户头像下拉菜单的 settings 中选择 <code>SSH and GPG key</code> &rightarrow; <code>New SSH Key</code>。标题任意，Key 复制<code>id_rsa.pub</code>内容。添加成功后<code>SSH keys</code>即可见到加入项</p>
+<p> <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411193258.png" alt=""></p>
+<p> <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411193533.png" alt=""></p>
+</li>
+<li><p>返回 <code>blog</code> 目录的 <code>gitbash</code> 设置 <code>_config.yml</code> 文件，修改文件末尾的 <code>Deployment</code>。</p>
+<p> <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411195600.png" alt=""></p>
+</li>
+<li><p>修改 <code>ropo</code> 项为 <code>git@github.com:&lt;userName&gt;/&lt;userName&gt;.github.io.git</code></p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repo: git@github.com:&lt;userName&gt;/&lt;userName&gt;.github.io</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+
+<p> <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411195214.png" alt=""></p>
+</li>
+<li><p>修改后保存退出，即可再次尝试上传博文验证修改结果。</p>
+</li>
+</ol>
+<h3 id="杂项"><a href="#杂项" class="headerlink" title="杂项"></a>杂项</h3><ul>
 <li><p>网络原因，实测更新会有一段时间的延迟，请耐心等待几分钟再刷新。验证是否更新成功，可以在 GitHub 相应仓库中查看文件夹更新时间</p>
 </li>
 <li><p>更换主题，会在另外的文章再行介绍</p>
 </li>
-<li><p><code>hexo</code> 命令上传部署有点繁琐，后续会尝试通过 <code>Git</code> 直接提交更新的方式，学有余力再编写上传脚本</p>
+<li><p>上传命令可直接简化为 <code>hexo g -d</code></p>
+</li>
+<li><p>如果是外部博客文件注意添加使用 <code>YAML Front Matter</code>，否则<code>hexo</code>无法准确识别</p>
 <hr>
 </li>
 </ul>
 <h2 id="感谢"><a href="#感谢" class="headerlink" title="感谢"></a>感谢</h2><ul>
-<li>小白一枚，基本照搬，十分感谢程序羊大佬的教学指导，<a href="https://www.bilibili.com/video/BV1Yb411a7ty/" target="_blank" rel="noopener">参考视频</a></li>
+<li><a href="https://www.bilibili.com/video/BV1Yb411a7ty/" target="_blank" rel="noopener">参考视频</a></li>
 </ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/04/01/Win10-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" data-id="ck8g5v2vu000074w1esnp6byq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/04/11/Win10%20%20Hexo%20%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" data-id="ck8vknb3o0001hkw19mq2c0mq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -357,7 +382,7 @@
       <ul>
         
           <li>
-            <a href="/2020/04/01/Win10-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">Win10 GitHub Hexo 搭建个人博客</a>
+            <a href="/2020/04/11/Win10%20%20Hexo%20%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">Win10 GitHub Hexo 搭建个人博客</a>
           </li>
         
           <li>
