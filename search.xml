@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>Hexo NexT 主题配置</title>
-    <url>/2020/04/12/Hexo%20Next%E4%B8%BB%E9%A2%98/</url>
+    <url>/2020/04/12/Hexo%20Next%20%E4%B8%BB%E9%A2%98/</url>
     <content><![CDATA[<p><ul class="markdownIt-TOC">
 <li><a href="#%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE">安装配置</a></li>
 <li><a href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E8%AE%BE%E7%BD%AE">个性化设置</a>
@@ -92,11 +92,11 @@
 <h3 id="修改主题样式"><a class="markdownIt-Anchor" href="#修改主题样式"></a> 修改主题样式</h3>
 <ol>
 <li>
-<p>进入<code>themes/next</code>目录，打开该目录下的<code>_config.yml</code>进行主题设置</p>
+<p><strong>进入<code>themes/next</code>目录</strong>，打开该目录下的<code>_config.yml</code>进行主题设置</p>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411221749.png" alt="" /></p>
 </li>
 <li>
-<p>找到 <code>scheme</code> 关键字，会看到有四行 <code>scheme</code> 的配置，将需要启用的 <code>scheme</code> 前面注释 <code>#</code> 去除，同时把原来的加上注释 <code>#</code> 即可</p>
+<p>找到 <code>scheme</code> 关键字，会看到有四行 <code>scheme</code> 的配置，将需要启用的 <code>scheme</code> 前面<strong>注释 <code>#</code> 去除</strong>，同时把原来的加上注释 <code>#</code> 即可</p>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411221917.png" alt="" /></p>
 </li>
 <li>
@@ -117,11 +117,11 @@
 <h3 id="设置头像"><a class="markdownIt-Anchor" href="#设置头像"></a> 设置头像</h3>
 <ol>
 <li>
-<p>找到并修改<code>avatar</code>项</p>
+<p>找到并修改**<code>avatar</code>**项</p>
  <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"># Sidebar Avatar</span><br><span class="line">avatar:</span><br><span class="line">  # Replace the <span class="keyword">default</span> <span class="built_in">image</span> <span class="keyword">and</span> <span class="built_in">set</span> the url here.</span><br><span class="line">  url: #/images/avatar.gif  <span class="comment">// 头像图片链接</span></span><br><span class="line">  # If <span class="literal">true</span>, the avatar will be dispalyed in <span class="built_in">circle</span>.</span><br><span class="line">  rounded: <span class="literal">false</span>  <span class="comment">// 是否显示为圆形</span></span><br><span class="line">  # If <span class="literal">true</span>, the avatar will be rotated with the <span class="built_in">cursor</span>.</span><br><span class="line">  rotated: <span class="literal">false</span>  <span class="comment">// 获得焦点时是否旋转</span></span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>头像图片由 <code>url</code> 指定，有三种指定方式</p>
+<p>头像图片由 <code>url</code> 指定，有<strong>三种指定方式</strong></p>
 <table>
 <thead>
 <tr>
@@ -156,7 +156,7 @@
 <h3 id="书签"><a class="markdownIt-Anchor" href="#书签"></a> 书签</h3>
 <ol>
 <li>
-<p>允许保存阅读进度。只需单击页面左上方的书签图标（如🔖）即可保存滚动位置。当下次访问时，可以自动恢复每个页面的最后滚动位置。</p>
+<p>允许保存阅读进度。只需单击<strong>页面左上方的书签</strong>图标（如🔖）即可保存滚动位置。当下次访问时，可以自动恢复每个页面的最后滚动位置。</p>
 </li>
 <li>
 <p>设置 <code>bookmark.enable</code> 的值为 <code>true</code> 以启用</p>
@@ -166,7 +166,7 @@
 <h3 id="阅读全文"><a class="markdownIt-Anchor" href="#阅读全文"></a> 阅读全文</h3>
 <ul>
 <li>
-<p><code>Hexo</code> 推荐做法是在文本中适当的位置写入 <code>&lt;!--more--&gt;</code>，手动设置显示摘录长度</p>
+<p><code>Hexo</code> <strong>推荐做法</strong>是在文本中适当的位置写入 <strong><code>&lt;!--more--&gt;</code></strong>，手动设置显示摘录长度</p>
 </li>
 <li>
 <p><code>NexT</code>主题同时也支持<strong>默认提取</strong> <code>Front Matter</code> 中的 <code>description</code> 作为摘录内容</p>
@@ -177,7 +177,7 @@
 <h3 id="侧边栏回溯按钮"><a class="markdownIt-Anchor" href="#侧边栏回溯按钮"></a> 侧边栏回溯按钮</h3>
 <ul>
 <li>
-<p>修改 <code>_config.yml</code> 的 <code>back2top</code> 项</p>
+<p>修改 <code>_config.yml</code> 的 <strong><code>back2top</code></strong> 项</p>
   <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">back2top:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span>  <span class="comment"># 开启回溯按钮 默认在右下角</span></span><br><span class="line">  <span class="comment"># Back to top in sidebar.</span></span><br><span class="line">  sidebar: <span class="literal">false</span>  <span class="comment"># 是否调整按钮到侧边栏 </span></span><br><span class="line">  <span class="comment"># Scroll percent label in b2t button.</span></span><br><span class="line">  scrollpercent: <span class="literal">false</span>  <span class="comment"># 是否在按钮上显示当前阅读进度</span></span><br></pre></td></tr></table></figure>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412020619.png" alt="" /></p>
 </li>
@@ -185,7 +185,7 @@
 <h3 id="字数统计"><a class="markdownIt-Anchor" href="#字数统计"></a> 字数统计</h3>
 <ul>
 <li>
-<p>返回站点主目录 <code>blog</code>，使用 <code>npm install hexo-symbols-count-time</code> 安装插件</p>
+<p><strong>返回站点主目录 <code>blog</code></strong>，使用 <code>npm install hexo-symbols-count-time</code> 安装<strong>插件</strong></p>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412151934.png" alt="" /></p>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412152043.png" alt="" /></p>
 </li>
@@ -193,22 +193,22 @@
 <h3 id="添加标签和分类界面"><a class="markdownIt-Anchor" href="#添加标签和分类界面"></a> 添加标签和分类界面</h3>
 <ol>
 <li>
-<p>返回站点主目录 <code>blog</code>，执行 <code>hexo new page tags</code> 新建 <code>tags</code> 页面，</p>
+<p><strong>返回站点主目录 <code>blog</code></strong>，执行 <code>hexo new page tags</code> 新建 <code>tags</code> 页面，</p>
 <p>执行 <code>hexo new page categories</code> 新建 <code>categories</code> 页面</p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new page tags</span><br><span class="line">hexo new page categories</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>编辑新建的页面目录中的<code>index.md</code>文件，添加``type: tags(categories)`</p>
+<p>编辑<strong>新建的页面目录</strong>中的<code>index.md</code>文件，添加**``type: tags(categories)`**</p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/tags/index.md</span><br><span class="line">vim <span class="built_in">source</span>/categories/index.md</span><br></pre></td></tr></table></figure>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: tags</span><br><span class="line">date: 2020-04-12 15:24:39</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"tags"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: categories</span><br><span class="line">date: 2020-04-12 15:27:26</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"categories"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 项中解除 <code>tags</code> 和 <code>categories</code> 的注释 <code>#</code></p>
+<p>编辑<strong>主题配置文件</strong> <code>themes/next/_config.yml</code>，在 <code>menu</code> 项中<strong>解除 <code>tags</code> 和 <code>categories</code> 的注释 <code>#</code></strong></p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># External url should start with http:// or https://</span></span><br><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment">#about: /about/ || fa fa-user</span></span><br><span class="line">  <span class="comment">#tags: /tags/ || fa fa-tags  删去# 解除此项注释</span></span><br><span class="line">  <span class="comment">#categories: /categories/ || fa fa-th  删去# 解除此项注释</span></span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>在编写 <code>Front Matter</code> 时，添加 <code>tag</code> 和 <code>categorie</code> 项</p>
+<p>在编写 <code>Front Matter</code> 时，添加 <strong><code>tag</code> 和 <code>categorie</code></strong> 项</p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">title: First_Article</span><br><span class="line">date: 2020-03-31 22:16:10</span><br><span class="line">description: <span class="string">'摘录信息'</span></span><br><span class="line">tags: </span><br><span class="line">	- other</span><br><span class="line">	- OTHER</span><br><span class="line">categories: Test</span><br></pre></td></tr></table></figure>
 </li>
 <li>
@@ -221,12 +221,12 @@
 <h3 id="数学公式渲染"><a class="markdownIt-Anchor" href="#数学公式渲染"></a> 数学公式渲染</h3>
 <ol>
 <li>
-<p>返回站点主目录 <code>blog</code> ，卸载原始渲染器 <code>hexo-renderer-marked</code>，安装渲染器 <code>hexo-renderer-markdown-it-plus</code></p>
+<p>返回<strong>站点主目录</strong> <code>blog</code> ，<strong>卸载</strong>原始渲染器 <code>hexo-renderer-marked</code>，<strong>安装</strong>渲染器 <code>hexo-renderer-markdown-it-plus</code></p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm un hexo-renderer-marked</span><br><span class="line">npm i hexo-renderer-markdown-it-plus</span><br></pre></td></tr></table></figure>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411234934.png" alt="" /></p>
 </li>
 <li>
-<p>在 <code>themes/next/_config.yml</code> 中查找到 <code>katex</code> 项并修改 <code>enable</code> 值为 <code>true</code></p>
+<p>在 <code>themes/next/_config.yml</code> 中查找到 <strong><code>katex</code></strong> 项并修改 <code>enable</code> 值为 <code>true</code></p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># hexo-renderer-markdown-it-plus (or hexo-renderer-markdown-it with markdown-it-katex plugin) required for full Katex support.</span></span><br><span class="line"> katex:</span><br><span class="line">   <span class="built_in">enable</span>: <span class="literal">false</span> <span class="comment"># 是否启用</span></span><br><span class="line">   <span class="comment"># See: https://github.com/KaTeX/KaTeX/tree/master/contrib/copy-tex</span></span><br><span class="line">   copy_tex: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
 </li>
 <li>
@@ -241,19 +241,25 @@
 <h3 id="本地搜索"><a class="markdownIt-Anchor" href="#本地搜索"></a> 本地搜索</h3>
 <ol>
 <li>
-<p>在站点主目录<code>blog</code>下，安装插件 <code>hexo-generator-searchdb</code></p>
+<p>在<strong>站点主目录</strong><code>blog</code>下，<strong>安装</strong>插件 <code>hexo-generator-searchdb</code></p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-generator-searchdb</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>安装完成后，编辑 <code>blog</code> 目录下的 <code>_config.yml</code>，在文件末尾添加 <code>search</code> 项，注意缩进</p>
+<p>安装完成后，编辑 <strong><code>blog</code> 目录</strong>下的 <code>_config.yml</code>，在文件末尾添加 <code>search</code> 项，<strong>注意缩进</strong></p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim _config.yml</span><br></pre></td></tr></table></figure>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Search</span></span><br><span class="line">search:</span><br><span class="line">  path: search.xml</span><br><span class="line">  field: post</span><br><span class="line">  format: html</span><br><span class="line">  <span class="built_in">limit</span>: 10000</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>编辑配置文件 <code>themes/next/_config.yml</code>，修改<code>local_search</code>项的<code>enable</code>值为<code>true</code></p>
+<p>编辑配置文件**<code>themes/next/_config.yml</code><strong>，修改</strong><code>local_search</code>**项的<code>enable</code>值为<code>true</code></p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">local_search:</span><br><span class="line">  <span class="comment"># 是否启用本地搜索</span></span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">false</span></span><br><span class="line">  <span class="comment"># 是否自动显示结果 auto 自动  manual 手动</span></span><br><span class="line">  trigger: auto</span><br><span class="line">  <span class="comment"># 显示每篇文章的前n个结果 设置-1则显示所有结果</span></span><br><span class="line">  top_n_per_article: 1</span><br><span class="line">  unescape: <span class="literal">false</span></span><br><span class="line">  preload: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>执行 <code>hexo clean &amp;&amp; hexo s</code> 重新生成页面后，在 <code>http://local:4000</code> 查看本地页面，左侧栏出现搜索选项</p>
 <p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412162619.png" alt="" /></p>
+</li>
+<li>
+<p>后续按需部署到远端即可</p>
 </li>
 </ol>
 <hr />
@@ -450,6 +456,93 @@
         <category>BuildBlog</category>
       </categories>
       <tags>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NexT Valine 评论系统配置</title>
+    <url>/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8">创建应用</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE-appkey">配置 AppKey</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE">部署项目</a></li>
+<li><a href="#%E8%AF%84%E8%AE%BA%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86">评论数据管理</a></li>
+<li><a href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E8%AE%BE%E7%BD%AE">个性化设置</a></li>
+</ul>
+</p>
+<h1 id="valine-评论系统配置"><a class="markdownIt-Anchor" href="#valine-评论系统配置"></a> Valine 评论系统配置</h1>
+<h2 id="创建应用"><a class="markdownIt-Anchor" href="#创建应用"></a> 创建应用</h2>
+<ol>
+<li>
+<p>进入<a href="https://www.leancloud.cn/" target="_blank" rel="noopener">LeanCloud</a>官网，点击右上角控制台，注册账号</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412195907.png" alt="" /></p>
+</li>
+<li>
+<p>按要求验证邮箱和实名认证</p>
+</li>
+<li>
+<p>点击左上方<code>应用</code> → <code>创建应用</code>，填写应用名称（随意），选择开发版，创建</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200228.png" alt="" /></p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200814.png" alt="" /></p>
+</li>
+<li>
+<p>在面板可以看到新添加的应用</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201038.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="配置-appkey"><a class="markdownIt-Anchor" href="#配置-appkey"></a> 配置 AppKey</h2>
+<ol>
+<li>
+<p>点击应用右上设置按钮，进入设置面板，点击左侧栏<code>设置</code> → <code>应用Keys</code>，分别保存**<code>App ID</code> 与 <code>AppKey</code>**</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201401.png" alt="" /></p>
+</li>
+<li>
+<p>开启<code>git bash</code> 切换到站点主目录 <code>blog</code> ，编辑**<code>themes/next/_config.yml</code>**</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /themes/next/_config.yml</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>查找到 <code>valine</code> 项，修改其 <code>enable</code> 值为 <code>true</code>，并将 <code>LeanCloud</code> 页面的 <code>AppID</code> 和 <code>appKey</code> 分别填入 <code>enable</code> 下方两项 <code>appid</code> 和 <code>appkey</code></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span>  <span class="comment"># 是否启用 valine 评论系统</span></span><br><span class="line">  appid: XXXXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="部署项目"><a class="markdownIt-Anchor" href="#部署项目"></a> 部署项目</h2>
+<ol>
+<li>
+<p>修改配置文件后， 保存退出</p>
+</li>
+<li>
+<p>在主目录 <code>blog</code> 下，执行 <code>hexo clean &amp;&amp; hexo s</code>，重新生成页面</p>
+</li>
+<li>
+<p>浏览器使用 <code>http://localhost:4000</code> 进入本地页面查看添加效果</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412203157.png" alt="" /></p>
+</li>
+<li>
+<p>执行 <code>hexo clean &amp;&amp; hexo g -d</code> 可直接部署到远端</p>
+</li>
+</ol>
+<h2 id="评论数据管理"><a class="markdownIt-Anchor" href="#评论数据管理"></a> 评论数据管理</h2>
+<ol>
+<li>
+<p>进入 <code>LeanCloud</code>，登录账号</p>
+</li>
+<li>
+<p>点击用于存储评论的应用，进入其管理界面</p>
+</li>
+<li>
+<p>选择 <code>存储</code> → <code>结构化数据</code> → <code>Comment</code>，即可在管理端实现数据增删查改</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412210207.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="个性化设置"><a class="markdownIt-Anchor" href="#个性化设置"></a> 个性化设置</h2>
+<p><code>NexT</code> 主题配置文件中支持更多关于 <code>Valine</code> 的其他配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  appid: XXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br><span class="line">  notify: <span class="literal">false</span> <span class="comment"># 邮件通知</span></span><br><span class="line">  verify: <span class="literal">false</span> <span class="comment"># 验证码</span></span><br><span class="line">  placeholder: Just go go <span class="comment"># 输入文本框占位符</span></span><br><span class="line">  avatar: mm <span class="comment"># 头像风格</span></span><br><span class="line">  guest_info: nick,mail,link <span class="comment"># 用户信息栏</span></span><br><span class="line">  pageSize: 10 <span class="comment"># 分页大小</span></span><br><span class="line">  language: <span class="comment"># 语言, 可用值: en, zh-cn</span></span><br><span class="line">  visitor: <span class="literal">false</span> <span class="comment"># 文章阅读统计</span></span><br><span class="line">  comment_count: <span class="literal">true</span> <span class="comment"># If false, comment count will only be displayed in post page, not in home page</span></span><br><span class="line">  recordIP: <span class="literal">false</span> <span class="comment"># Whether to record the commenter IP</span></span><br><span class="line">  serverURLs: <span class="comment"># When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)</span></span><br><span class="line">  <span class="comment">#post_meta_order: 0</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>BuildBlog</category>
+      </categories>
+      <tags>
+        <tag>NexT</tag>
         <tag>Hexo</tag>
       </tags>
   </entry>
