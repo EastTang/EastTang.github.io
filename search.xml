@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>google48c25425d31186f3</title>
-    <url>/2020/04/13/google48c25425d31186f3/</url>
-    <content><![CDATA[google-site-verification: google48c25425d31186f3.html]]></content>
-  </entry>
-  <entry>
     <title>Hexo NexT 主题配置</title>
     <url>/2020/04/12/Hexo%20Next%20%E4%B8%BB%E9%A2%98/</url>
     <content><![CDATA[<p><ul class="markdownIt-TOC">
@@ -282,98 +277,6 @@
       </tags>
   </entry>
   <entry>
-    <title>NexT Valine 留言板页面配置</title>
-    <url>/2020/04/12/NexT%20%E7%95%99%E8%A8%80%E6%9D%BF%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E9%9D%A2">创建页面</a></li>
-<li><a href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">修改配置文件</a></li>
-<li><a href="#valine-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%93%8D%E4%BD%9C">Valine 配置与操作</a></li>
-<li><a href="#%E6%9C%80%E5%90%8E%E9%83%A8%E7%BD%B2">最后部署</a></li>
-<li><a href="#%E5%A4%87%E6%B3%A8">备注</a></li>
-</ul>
-</p>
-<h1 id="next-valine-留言板页面配置"><a class="markdownIt-Anchor" href="#next-valine-留言板页面配置"></a> NexT Valine 留言板页面配置</h1>
-<blockquote>
-<p>留言板生成本质可以视为新建一个自定义页面，操作过程与标签、分类页的创建大同小异</p>
-</blockquote>
-<h2 id="创建页面"><a class="markdownIt-Anchor" href="#创建页面"></a> 创建页面</h2>
-<ol>
-<li>
-<p>在网站主目录 <code>blog</code>下执行 <code>hexo new page GuestBook</code></p>
-<blockquote>
-<p>INFO  Created: D:\blog\source\GuestBook\<a href="http://index.md" target="_blank" rel="noopener">index.md</a></p>
-</blockquote>
-</li>
-<li>
-<p>编辑新页面的 <code>index.md</code> 文件，修改其 <code>Front Matter</code>，添加 <code>type</code> 项</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/GuestBook/index.md</span><br></pre></td></tr></table></figure>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: GuestBook</span><br><span class="line">date: 2020-04-12 22:35:28</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"GuestBook"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h2 id="修改配置文件"><a class="markdownIt-Anchor" href="#修改配置文件"></a> 修改配置文件</h2>
-<ol>
-<li>
-<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 中仿照已有格式添加 <code>GuestBook</code></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment"># about: /about/ || fa fa-user</span></span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  <span class="comment"># 按已有格式 添加GuestBook项</span></span><br><span class="line">  GuestBook: /GuestBook/ || fa fa-paper-plane</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>规定格式为 <code>&lt;menuName&gt;: /&lt;dirName&gt;/ || &lt;link&gt; &lt;iconName&gt;</code></p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">选项</th>
-<th style="text-align:center">说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">menuName</td>
-<td style="text-align:center">显示在页面菜单栏中的页面名</td>
-</tr>
-<tr>
-<td style="text-align:center">dirName</td>
-<td style="text-align:center"><code>hexo new page</code> 时，使用的页面名</td>
-</tr>
-<tr>
-<td style="text-align:center">link</td>
-<td style="text-align:center">指向网站内相对URL的图标目标链接，初始使用 <code>fa</code></td>
-</tr>
-<tr>
-<td style="text-align:center">iconName</td>
-<td style="text-align:center">图标名称，可自行替换其它，<code>fa</code> 使用的是 <a href="https://fontawesome.com/" target="_blank" rel="noopener"><code>Font Awesome</code></a></td>
-</tr>
-</tbody>
-</table>
-</li>
-</ol>
-<h2 id="valine-配置与操作"><a class="markdownIt-Anchor" href="#valine-配置与操作"></a> Valine 配置与操作</h2>
-<p>详细请参见博客：<a href="https://easttang.github.io/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">NexT Valine 评论系统配置</a></p>
-<h2 id="最后部署"><a class="markdownIt-Anchor" href="#最后部署"></a> 最后部署</h2>
-<ol>
-<li>
-<p>修改保存后，先执行 <code>hexo clean &amp;&amp; hexo s</code>  在本地界面 <code>http://local:4000</code> 查看效果</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412231418.png" alt="" /></p>
-</li>
-<li>
-<p>后执行 <code>hexo clean &amp;&amp; hexo g -d</code> 生成新页面文件，并部署到远端</p>
-</li>
-</ol>
-<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
-<ul>
-<li>菜单栏中<code>GuestBook</code>可以修改名称，同样只需修改主题配置文件 <code>themes/next/_config.yml</code>的 <code>menu</code> 项，将添加的 <code>&lt;menuName&gt;</code>即 <code>GuestBook</code> 替换即可，只修改冒号前的即可。为保证稳定性，建议若修改为中文，可以考虑将站点语言设为 <code>en</code></li>
-<li>如有需要，其他自定义页面配置方法与此类似</li>
-</ul>
-]]></content>
-      <categories>
-        <category>BuildBlog</category>
-      </categories>
-      <tags>
-        <tag>NexT</tag>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>NexT Valine 评论系统配置</title>
     <url>/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/</url>
     <content><![CDATA[<p><ul class="markdownIt-TOC">
@@ -462,6 +365,98 @@
 <h2 id="个性化设置"><a class="markdownIt-Anchor" href="#个性化设置"></a> 个性化设置</h2>
 <p><code>NexT</code> 主题配置文件中支持更多关于 <code>Valine</code> 的其他配置</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  appid: XXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br><span class="line">  notify: <span class="literal">false</span> <span class="comment"># 邮件通知</span></span><br><span class="line">  verify: <span class="literal">false</span> <span class="comment"># 验证码</span></span><br><span class="line">  placeholder: Just go go <span class="comment"># 输入文本框占位符</span></span><br><span class="line">  avatar: mm <span class="comment"># 头像风格</span></span><br><span class="line">  guest_info: nick,mail,link <span class="comment"># 用户信息栏</span></span><br><span class="line">  pageSize: 10 <span class="comment"># 分页大小</span></span><br><span class="line">  language: <span class="comment"># 语言, 可用值: en, zh-cn</span></span><br><span class="line">  visitor: <span class="literal">false</span> <span class="comment"># 文章阅读统计</span></span><br><span class="line">  comment_count: <span class="literal">true</span> <span class="comment"># If false, comment count will only be displayed in post page, not in home page</span></span><br><span class="line">  recordIP: <span class="literal">false</span> <span class="comment"># Whether to record the commenter IP</span></span><br><span class="line">  serverURLs: <span class="comment"># When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)</span></span><br><span class="line">  <span class="comment">#post_meta_order: 0</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>BuildBlog</category>
+      </categories>
+      <tags>
+        <tag>NexT</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NexT Valine 留言板页面配置</title>
+    <url>/2020/04/12/NexT%20%E7%95%99%E8%A8%80%E6%9D%BF%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E9%9D%A2">创建页面</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">修改配置文件</a></li>
+<li><a href="#valine-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%93%8D%E4%BD%9C">Valine 配置与操作</a></li>
+<li><a href="#%E6%9C%80%E5%90%8E%E9%83%A8%E7%BD%B2">最后部署</a></li>
+<li><a href="#%E5%A4%87%E6%B3%A8">备注</a></li>
+</ul>
+</p>
+<h1 id="next-valine-留言板页面配置"><a class="markdownIt-Anchor" href="#next-valine-留言板页面配置"></a> NexT Valine 留言板页面配置</h1>
+<blockquote>
+<p>留言板生成本质可以视为新建一个自定义页面，操作过程与标签、分类页的创建大同小异</p>
+</blockquote>
+<h2 id="创建页面"><a class="markdownIt-Anchor" href="#创建页面"></a> 创建页面</h2>
+<ol>
+<li>
+<p>在网站主目录 <code>blog</code>下执行 <code>hexo new page GuestBook</code></p>
+<blockquote>
+<p>INFO  Created: D:\blog\source\GuestBook\<a href="http://index.md" target="_blank" rel="noopener">index.md</a></p>
+</blockquote>
+</li>
+<li>
+<p>编辑新页面的 <code>index.md</code> 文件，修改其 <code>Front Matter</code>，添加 <code>type</code> 项</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/GuestBook/index.md</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: GuestBook</span><br><span class="line">date: 2020-04-12 22:35:28</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"GuestBook"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="修改配置文件"><a class="markdownIt-Anchor" href="#修改配置文件"></a> 修改配置文件</h2>
+<ol>
+<li>
+<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 中仿照已有格式添加 <code>GuestBook</code></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment"># about: /about/ || fa fa-user</span></span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  <span class="comment"># 按已有格式 添加GuestBook项</span></span><br><span class="line">  GuestBook: /GuestBook/ || fa fa-paper-plane</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>规定格式为 <code>&lt;menuName&gt;: /&lt;dirName&gt;/ || &lt;link&gt; &lt;iconName&gt;</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">选项</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">menuName</td>
+<td style="text-align:center">显示在页面菜单栏中的页面名</td>
+</tr>
+<tr>
+<td style="text-align:center">dirName</td>
+<td style="text-align:center"><code>hexo new page</code> 时，使用的页面名</td>
+</tr>
+<tr>
+<td style="text-align:center">link</td>
+<td style="text-align:center">指向网站内相对URL的图标目标链接，初始使用 <code>fa</code></td>
+</tr>
+<tr>
+<td style="text-align:center">iconName</td>
+<td style="text-align:center">图标名称，可自行替换其它，<code>fa</code> 使用的是 <a href="https://fontawesome.com/" target="_blank" rel="noopener"><code>Font Awesome</code></a></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<h2 id="valine-配置与操作"><a class="markdownIt-Anchor" href="#valine-配置与操作"></a> Valine 配置与操作</h2>
+<p>详细请参见博客：<a href="https://easttang.github.io/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">NexT Valine 评论系统配置</a></p>
+<h2 id="最后部署"><a class="markdownIt-Anchor" href="#最后部署"></a> 最后部署</h2>
+<ol>
+<li>
+<p>修改保存后，先执行 <code>hexo clean &amp;&amp; hexo s</code>  在本地界面 <code>http://local:4000</code> 查看效果</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412231418.png" alt="" /></p>
+</li>
+<li>
+<p>后执行 <code>hexo clean &amp;&amp; hexo g -d</code> 生成新页面文件，并部署到远端</p>
+</li>
+</ol>
+<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
+<ul>
+<li>菜单栏中<code>GuestBook</code>可以修改名称，同样只需修改主题配置文件 <code>themes/next/_config.yml</code>的 <code>menu</code> 项，将添加的 <code>&lt;menuName&gt;</code>即 <code>GuestBook</code> 替换即可，只修改冒号前的即可。为保证稳定性，建议若修改为中文，可以考虑将站点语言设为 <code>en</code></li>
+<li>如有需要，其他自定义页面配置方法与此类似</li>
+</ul>
 ]]></content>
       <categories>
         <category>BuildBlog</category>
