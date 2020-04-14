@@ -1,101 +1,364 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>NexT Valine 评论系统配置</title>
-    <url>/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/</url>
+    <title>计算机网络基本概念</title>
+    <url>/2020/04/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</url>
     <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8">创建应用</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE-appkey">配置 AppKey</a></li>
-<li><a href="#%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE">部署项目</a></li>
-<li><a href="#%E8%AF%84%E8%AE%BA%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86">评论数据管理</a></li>
-<li><a href="#%E8%AF%84%E8%AE%BA%E5%8A%9F%E8%83%BD%E5%85%B3%E9%97%AD">评论功能关闭</a></li>
-<li><a href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E8%AE%BE%E7%BD%AE">个性化设置</a></li>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5">基本概念</a></li>
+<li><a href="#%E5%88%86%E7%B1%BB">分类</a></li>
+<li><a href="#%E5%AF%BC%E5%9B%BE">导图</a></li>
+<li><a href="#%E5%88%86%E5%B1%82%E6%A6%82%E5%BF%B5">分层概念</a></li>
+<li><a href="#%E6%A8%A1%E5%9E%8B">模型</a>
+<ul>
+<li><a href="#osi">OSI</a></li>
+<li><a href="#tcpip">TCP/IP</a></li>
+<li><a href="#5-%E5%B1%82%E5%8F%82%E8%80%83%E6%A8%A1%E5%9E%8B">5 层参考模型</a></li>
+</ul>
+</li>
 </ul>
 </p>
-<h1 id="valine-评论系统配置"><a class="markdownIt-Anchor" href="#valine-评论系统配置"></a> Valine 评论系统配置</h1>
-<h2 id="创建应用"><a class="markdownIt-Anchor" href="#创建应用"></a> 创建应用</h2>
-<ol>
-<li>
-<p>进入<a href="https://www.leancloud.cn/" target="_blank" rel="noopener">LeanCloud</a>官网，点击右上角控制台，注册账号</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412195907.png" alt="" /></p>
-</li>
-<li>
-<p>按要求验证邮箱和实名认证</p>
-</li>
-<li>
-<p>点击左上方<code>应用</code> → <code>创建应用</code>，填写应用名称（随意），选择开发版，创建</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200228.png" alt="" /></p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200814.png" alt="" /></p>
-</li>
-<li>
-<p>在面板可以看到新添加的应用</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201038.png" alt="" /></p>
-</li>
-</ol>
-<h2 id="配置-appkey"><a class="markdownIt-Anchor" href="#配置-appkey"></a> 配置 AppKey</h2>
-<ol>
-<li>
-<p>点击应用右上设置按钮，进入设置面板，点击左侧栏<code>设置</code> → <code>应用Keys</code>，分别<strong>保存<code>App ID</code> 与 <code>AppKey</code></strong></p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201401.png" alt="" /></p>
-</li>
-<li>
-<p>开启<code>git bash</code> 切换到站点主目录 <code>blog</code> ，<strong>编辑<code>themes/next/_config.yml</code></strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /themes/next/_config.yml</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>查找到 <code>valine</code> 项，修改其 <code>enable</code> 值为 <code>true</code>，并将 <code>LeanCloud</code> 页面的 <code>AppID</code> 和 <code>appKey</code> 分别填入 <code>enable</code> 下方两项 <code>appid</code> 和 <code>appkey</code></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span>  <span class="comment"># 是否启用 valine 评论系统</span></span><br><span class="line">  appid: XXXXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h2 id="部署项目"><a class="markdownIt-Anchor" href="#部署项目"></a> 部署项目</h2>
-<ol>
-<li>
-<p>修改配置文件后， 保存退出</p>
-</li>
-<li>
-<p>在主目录 <code>blog</code> 下，执行 <code>hexo clean &amp;&amp; hexo s</code>，重新生成页面</p>
-</li>
-<li>
-<p>浏览器使用 <code>http://localhost:4000</code> 进入本地页面查看添加效果</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412203157.png" alt="" /></p>
-</li>
-<li>
-<p>执行 <code>hexo clean &amp;&amp; hexo g -d</code> 可直接部署到远端</p>
-</li>
-</ol>
-<h2 id="评论数据管理"><a class="markdownIt-Anchor" href="#评论数据管理"></a> 评论数据管理</h2>
-<ol>
-<li>
-<p>进入 <code>LeanCloud</code>，登录账号</p>
-</li>
-<li>
-<p>点击用于存储评论的应用，进入其管理界面</p>
-</li>
-<li>
-<p>选择 <code>存储</code> → <code>结构化数据</code> → <code>Comment</code>，即可在管理端实现数据增删查改</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412210207.png" alt="" /></p>
-</li>
-</ol>
-<h2 id="评论功能关闭"><a class="markdownIt-Anchor" href="#评论功能关闭"></a> 评论功能关闭</h2>
+<h1 id="计算机网络"><a class="markdownIt-Anchor" href="#计算机网络"></a> 计算机网络</h1>
+<h2 id="基本概念"><a class="markdownIt-Anchor" href="#基本概念"></a> 基本概念</h2>
 <ul>
-<li>
-<p>关闭特定文章的评论功能只需在其 <code>Front Matter</code> 中，添加 <code>comments: false</code></p>
-</li>
-<li>
-<p>关闭指定页面（如分类、标签页）的评论功能，则需进入页面目录，编辑其 <code>index.md</code> 文件，同样添加 <code>Front Matter</code> 的 <code>comments</code>项</p>
-  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/&lt;pageName&gt;/index.md</span><br></pre></td></tr></table></figure>
+<li><strong>计算机网络</strong>：将分散、独立的<strong>计算机系统</strong>，通过<strong>通信设备</strong>和<strong>线路</strong>连接起来，由软件实现<strong>资源共享</strong>和<strong>信息传递</strong>的系统
+<ul>
+<li>是<strong>互连</strong>（互联互通）、<strong>自治</strong>（无主从关系）的计算机集合</li>
+</ul>
 </li>
 </ul>
-<h2 id="个性化设置"><a class="markdownIt-Anchor" href="#个性化设置"></a> 个性化设置</h2>
-<p><code>NexT</code> 主题配置文件中支持更多关于 <code>Valine</code> 的其他配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  appid: XXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br><span class="line">  notify: <span class="literal">false</span> <span class="comment"># 邮件通知</span></span><br><span class="line">  verify: <span class="literal">false</span> <span class="comment"># 验证码</span></span><br><span class="line">  placeholder: Just go go <span class="comment"># 输入文本框占位符</span></span><br><span class="line">  avatar: mm <span class="comment"># 头像风格</span></span><br><span class="line">  guest_info: nick,mail,link <span class="comment"># 用户信息栏</span></span><br><span class="line">  pageSize: 10 <span class="comment"># 分页大小</span></span><br><span class="line">  language: <span class="comment"># 语言, 可用值: en, zh-cn</span></span><br><span class="line">  visitor: <span class="literal">false</span> <span class="comment"># 文章阅读统计</span></span><br><span class="line">  comment_count: <span class="literal">true</span> <span class="comment"># If false, comment count will only be displayed in post page, not in home page</span></span><br><span class="line">  recordIP: <span class="literal">false</span> <span class="comment"># Whether to record the commenter IP</span></span><br><span class="line">  serverURLs: <span class="comment"># When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)</span></span><br><span class="line">  <span class="comment">#post_meta_order: 0</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413221407.png" alt="" /></p>
+<ul>
+<li>
+<p>功能</p>
+<ol>
+<li><strong>数据通信</strong>：连通性</li>
+<li><strong>资源共享</strong>：硬件、软件和数据的共享</li>
+<li>分布式处理：多台计算机分工完成项目</li>
+<li>提高可靠性：当网络中有设备宕机，及时实现替代机</li>
+<li>负载均衡</li>
+</ol>
+</li>
+<li>
+<p>组成</p>
+<ol>
+<li>
+<p>组成划分：硬件、软件、协议</p>
+</li>
+<li>
+<p>工作方式</p>
+<ul>
+<li>边缘部分 用户直接使用 （<code>C/S</code>方式、<code>P2P</code>方式）</li>
+<li>核心部分 为边缘部分提供服务</li>
+</ul>
+</li>
+<li>
+<p><strong>功能组成</strong></p>
+</li>
+</ol>
+</li>
+<li>
+<p>通信子网 <strong>数据通信</strong><br />
+- 资源子网 <strong>资源共享</strong>及数据处理</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413221825.png" alt="" /></p>
+</li>
+</ul>
+<h2 id="分类"><a class="markdownIt-Anchor" href="#分类"></a> 分类</h2>
+<ol>
+<li>适用范围
+<ul>
+<li>广域网<code>WAN</code>（交换技术）、城域网<code>MAN</code>、</li>
+<li>局域网<code>LAN</code>（广播技术）、个人区域网<code>PAN</code></li>
+</ul>
+</li>
+<li>使用者
+<ul>
+<li>公用网 （移动、联通）</li>
+<li>专用网 （军事、政府）</li>
+</ul>
+</li>
+<li>交换技术：电路交换、报文交换、分组交换</li>
+<li>拓扑结构：总线形、星形、环形、网状形（常用于广域网）</li>
+<li><strong>传输技术</strong>
+<ul>
+<li><strong>广播式</strong> 共享公共通信信道</li>
+<li><strong>点对点</strong> 使用 <em>分组存储转发</em> 和 <em>路由选择</em> 机制</li>
+</ul>
+</li>
+</ol>
+<h2 id="导图"><a class="markdownIt-Anchor" href="#导图"></a> 导图</h2>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414153126.png" alt="" /></p>
+<hr />
+<h1 id="评价指标"><a class="markdownIt-Anchor" href="#评价指标"></a> 评价指标</h1>
+<ol>
+<li>
+<p><strong>速率</strong>（数据率、比特率）</p>
+<ul>
+<li>主机在数字信道上传送<strong>比特</strong><code>bit</code>数据的速率</li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo separator="true">,</mo><mi>k</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo>⋯</mo></mrow><annotation encoding="application/x-tex">单位：b/s, kb/s \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span></li>
+<li>速率考虑的是<strong>比特传输</strong>，所以使用<code>b（bit）</code>；存储容量考虑量，使用<code>B（Byte 位）</code></li>
+</ul>
+</li>
+<li>
+<p><strong>带宽</strong></p>
+<ul>
+<li><strong>理想</strong>情况下，信道能达到的<strong>最高数据率</strong></li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo separator="true">,</mo><mi>k</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo>⋯</mo></mrow><annotation encoding="application/x-tex">单位：b/s, kb/s \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span></li>
+<li>反应网络的通信线路传送数据的能力</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414162906.png" alt="" /></p>
+</li>
+<li>
+<p><strong>吞吐量</strong></p>
+<ul>
+<li>表示单位时间内通过某个网络（或<strong>信道</strong>、<strong>接口</strong>）的<strong>数据量</strong>，受带宽和网络额定速率限制</li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo separator="true">,</mo><mi>k</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo>⋯</mo></mrow><annotation encoding="application/x-tex">单位：b/s, kb/s \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413225407.png" alt="" /></p>
+</li>
+<li>
+<p><strong>时延</strong></p>
+<ul>
+<li>
+<p>数据（报文/分组/比特流）从网络一端传送到另一端的<strong>耗时</strong>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">单位：s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">s</span></span></span></span></p>
+</li>
+<li>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">总</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mi mathvariant="normal">发</mi><mi mathvariant="normal">送</mi><mi mathvariant="normal">（</mi><mi mathvariant="normal">传</mi><mi mathvariant="normal">输</mi><mi mathvariant="normal">）</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>+</mo><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>+</mo><mi mathvariant="normal">排</mi><mi mathvariant="normal">队</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>+</mo><mi mathvariant="normal">处</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi></mrow><annotation encoding="application/x-tex">总时延 = 发送（传输）时延+传播时延+排队时延+处理时延</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">总</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">发</span><span class="mord cjk_fallback">送</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">输</span><span class="mord cjk_fallback">）</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">排</span><span class="mord cjk_fallback">队</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">处</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">发</mi><mi mathvariant="normal">送</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mfrac><mrow><mi mathvariant="normal">数</mi><mi mathvariant="normal">据</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><mrow><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">带</mi><mi mathvariant="normal">宽</mi><mi mathvariant="normal">（</mi><mi mathvariant="normal">发</mi><mi mathvariant="normal">送</mi><mi mathvariant="normal">速</mi><mi mathvariant="normal">率</mi><mi mathvariant="normal">）</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">发送时延 = \frac {数据长度} {信道带宽（发送速率）}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">发</span><span class="mord cjk_fallback">送</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.363em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.677em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">带</span><span class="mord cjk_fallback">宽</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">发</span><span class="mord cjk_fallback">送</span><span class="mord cjk_fallback">速</span><span class="mord cjk_fallback">率</span><span class="mord cjk_fallback">）</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">数</span><span class="mord cjk_fallback">据</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mfrac><mrow><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><mrow><mi mathvariant="normal">介</mi><mi mathvariant="normal">质</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">速</mi><mi mathvariant="normal">率</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">传播时延 = \frac {信道长度} {介质中传播速率}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.363em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.677em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">介</span><span class="mord cjk_fallback">质</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">速</span><span class="mord cjk_fallback">率</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+</li>
+<li>
+<p><strong>发送时延</strong>：数据处理为比特流的时间，发生在机器内</p>
+<ul>
+<li><strong>高速链路</strong>：发送速率极高，而<strong>不影响传播速率</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>传播速率</strong>：取决于<strong>电磁波传播</strong>速率和信道<strong>链路长度</strong>，发生在机器外</p>
+</li>
+<li>
+<p>排队时延：等待输入（输出）链路可用的时间（类似安检前排队）</p>
+</li>
+<li>
+<p>处理时延：检错，查找输出端（类似安检时扫描）</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>时延带宽积</strong></p>
+<ul>
+<li>以比特为单位的链路长度（即<strong>某段饱和链路现在有多少比特</strong>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi>i</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">单位：bit</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">t</span></span></span></span>）</li>
+<li>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mi mathvariant="normal">带</mi><mi mathvariant="normal">宽</mi><mi mathvariant="normal">积</mi><mo>=</mo><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>×</mo><mi mathvariant="normal">带</mi><mi mathvariant="normal">宽</mi></mrow><annotation encoding="application/x-tex">时延带宽积 = 传播时延 \times 带宽 
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mord cjk_fallback">带</span><span class="mord cjk_fallback">宽</span><span class="mord cjk_fallback">积</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">带</span><span class="mord cjk_fallback">宽</span></span></span></span></span></p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413231202.png" alt="" /></p>
+</li>
+<li>
+<p><strong>往返时延</strong></p>
+<ul>
+<li>发送方发送数据 → 接收方接收数据 → 接收方发送确认信息 → 接收方收到确认 的<strong>全过程耗时</strong></li>
+<li>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">往</mi><mi mathvariant="normal">返</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>×</mo><mn>2</mn><mo>+</mo><mi mathvariant="normal">末</mi><mi mathvariant="normal">端</mi><mi mathvariant="normal">处</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">间</mi></mrow><annotation encoding="application/x-tex">往返时延 = 传播时延 \times 2 + 末端处理时间
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">往</span><span class="mord cjk_fallback">返</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">末</span><span class="mord cjk_fallback">端</span><span class="mord cjk_fallback">处</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">间</span></span></span></span></span></p>
+</li>
+<li>往返时间越大，收到确认前，可以发送的数据就越多</li>
+</ul>
+</li>
+<li>
+<p><strong>利用率</strong></p>
+<ul>
+<li>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">利</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">率</mi><mo>=</mo><mfrac><mrow><mi mathvariant="normal">有</mi><mi mathvariant="normal">数</mi><mi mathvariant="normal">据</mi><mi mathvariant="normal">通</mi><mi mathvariant="normal">过</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">间</mi></mrow><mrow><mo stretchy="false">(</mo><mi mathvariant="normal">有</mi><mo>+</mo><mi mathvariant="normal">无</mi><mo stretchy="false">)</mo><mi mathvariant="normal">数</mi><mi mathvariant="normal">据</mi><mi mathvariant="normal">通</mi><mi mathvariant="normal">过</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">间</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">信道利用率 = \frac {有数据通过时间} {(有+无)数据通过时间}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">利</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">率</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.613em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.677em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord cjk_fallback">有</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord cjk_fallback">无</span><span class="mclose">)</span><span class="mord cjk_fallback">数</span><span class="mord cjk_fallback">据</span><span class="mord cjk_fallback">通</span><span class="mord cjk_fallback">过</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">间</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">有</span><span class="mord cjk_fallback">数</span><span class="mord cjk_fallback">据</span><span class="mord cjk_fallback">通</span><span class="mord cjk_fallback">过</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">间</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+</li>
+<li>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">网</mi><mi mathvariant="normal">络</mi><mi mathvariant="normal">利</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">率</mi><mo>=</mo><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">利</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">率</mi><mi mathvariant="normal">加</mi><mi mathvariant="normal">权</mi><mi mathvariant="normal">平</mi><mi mathvariant="normal">均</mi><mi mathvariant="normal">值</mi></mrow><annotation encoding="application/x-tex">网络利用率 = 信道利用率加权平均值
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">网</span><span class="mord cjk_fallback">络</span><span class="mord cjk_fallback">利</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">率</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">利</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">率</span><span class="mord cjk_fallback">加</span><span class="mord cjk_fallback">权</span><span class="mord cjk_fallback">平</span><span class="mord cjk_fallback">均</span><span class="mord cjk_fallback">值</span></span></span></span></span></p>
+</li>
+<li>
+<p><strong>利用率越高</strong>，信道上数据越饱和，<strong>时延就越大</strong></p>
+  <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413232030.png" style="zoom:80%;" />
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="分层模型"><a class="markdownIt-Anchor" href="#分层模型"></a> 分层模型</h1>
+<h2 id="分层概念"><a class="markdownIt-Anchor" href="#分层概念"></a> 分层概念</h2>
+<ol>
+<li>
+<p>原则</p>
+<ul>
+<li>各层<strong>独立</strong>，实现相对独立的一种功能</li>
+<li>各层<strong>界面自然清晰</strong>，耦合尽可能少</li>
+<li>结构分割，各采用<strong>最合适的技术</strong>实现</li>
+<li>保持下层对上层独立，<strong>上层单向使用层提供的服务</strong></li>
+<li>整个分层结构促进标准化工作</li>
+</ul>
+</li>
+<li>
+<p>成分</p>
+<ul>
+<li><strong>实体</strong>：第n层的活动元素称为n层实体，接收与发送端同一层的实体称为<strong>对等实体</strong></li>
+<li><strong>协议</strong>：为对等实体交换而设立的规则、<strong>标准</strong> 【水平方向】</li>
+<li><strong>接口</strong>：<strong>访问服务点SAP</strong>，上层使用下层服务的<strong>入口</strong></li>
+<li><strong>服务</strong>：下层为相邻上层提供的<strong>功能调用</strong></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414150323.png" alt="" /></p>
+</li>
+<li>
+<p>数据单元</p>
+<ul>
+<li><code>SDU</code>数据单元：完成用户所需功能而应传送的数据</li>
+<li><code>PCI</code>协议控制信息：控制协议操作的信息</li>
+<li><code>PDU</code>协议数据单元：<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mi>D</mi><mi>U</mi><mo>=</mo><mi>P</mi><mi>C</mi><mi>I</mi><mo>+</mo><mi>S</mi><mi>D</mi><mi>U</mi></mrow><annotation encoding="application/x-tex">PDU = PCI + SDU</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mord mathdefault" style="margin-right:0.02778em;">D</span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.02778em;">D</span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span>，本层次传送的数据单位</li>
+<li>本层本次传送的是<code>PDU</code>，作为下次接收的<code>SDU</code></li>
+</ul>
+ <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414160147.png" style="zoom:70%;" />
+</li>
+<li>
+<p>要点</p>
+<ul>
+<li>每层遵循某些<strong>网络协议</strong>完成本层功能</li>
+<li>计算机网络体系结构是<strong>分层结构</strong>，是计网的<strong>各层及其协议的集合</strong></li>
+<li>每层提供给上层的服务不只是本身的功能，还有其下层的功能</li>
+<li>仅在<strong>相邻层</strong>之间有接口，提供的具体服务细节对上一层<strong>完全屏蔽</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="模型"><a class="markdownIt-Anchor" href="#模型"></a> 模型</h2>
+<h3 id="osi"><a class="markdownIt-Anchor" href="#osi"></a> OSI</h3>
+<ol>
+<li>
+<p><strong>OSI 七层模型</strong>：应 表 会 传 网 数 物</p>
+<ul>
+<li>前四层端对端，后三层点对点</li>
+<li>中途的交换机只有<strong>后三层</strong></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414161202.jpg" alt="" /></p>
+</li>
+<li>
+<p>各层功能</p>
+<ul>
+<li>应：<strong>用户与网络交互</strong>，服务有文件传输<code>FTP</code>、电子邮件<code>SMTP</code>、万维网<code>HTTP</code></li>
+<li>表：<strong>数据加工</strong>
+<ul>
+<li>格式变换 （文字 → 比特）</li>
+<li>加密解密 （敏感信息加密处理）</li>
+<li>压缩恢复 （视频图像流）</li>
+</ul>
+</li>
+<li>会：建立<strong>会话/同步</strong>，向表示层实体/用户进程提供<strong>建立连接</strong>，并基于连接，<strong>有序传输</strong>数据
+<ul>
+<li>建立、管理、终止会话 （区分、分隔不同应用进程）</li>
+<li><strong>校验点</strong>，正在通信失效时读档重传 （是用于传输大文件）</li>
+</ul>
+</li>
+<li>传：本机与目标机的进程通信，即<strong>端对端</strong>的通信，传输单位是<strong>报文段或用户数据报</strong>
+<ul>
+<li><strong>决定</strong>可靠/不可靠传输 （确认重传机制）</li>
+<li><strong>差错控制</strong>，查验纠正接收到的数据报</li>
+<li><strong>流量控制</strong>，协调收发两方的数据传输速率</li>
+<li><strong>复用分用</strong>，不同进程的消息放<strong>同一个报文段</strong>发送，到达目标机后，按<strong>端口号</strong>分离发往目标进程</li>
+</ul>
+</li>
+<li>网：将报文<strong>分组</strong>从源端传送到目的端，为交换网上的不同主机提供服务，传输单位是<strong>数据报</strong>
+<ul>
+<li><strong>路由选择</strong>，选择传输所用的路由线路，查找<strong>最佳路线</strong></li>
+<li><strong>流量控制</strong>、<strong>差错控制</strong>，同上层，重复是因为交换机没有传输层，所以网络层也要维持限流和检错功能</li>
+<li><strong>拥塞控制</strong>，所有结点来不及接受分组而要大量丢弃分组就称为<strong>拥塞</strong>状态，网络层要采取一定缓解措施</li>
+</ul>
+</li>
+<li>数：数据报<strong>封装成帧</strong>，传输单位是<strong>帧</strong>
+<ul>
+<li><strong>成帧</strong>，定义帧的开始（首部）与结束（尾部）</li>
+<li><strong>差错控制</strong>，帧错 + 位错</li>
+<li>流量控制，同上</li>
+<li><strong>访问（接入）控制</strong>，控制各设备对共享信道的使用 （如广播式同一时间只允许一个设备发送数据报）</li>
+</ul>
+</li>
+<li>物：在<strong>物理媒体</strong>上实现<strong>比特流</strong>的<strong>透明传输</strong>（不论数据的比特组合，一律支持传送）
+<ul>
+<li>定义接口特性 （硬件层面的接口）</li>
+<li>定义传输模式，<strong>单工、双工、半双工</strong></li>
+<li>定义传输速率</li>
+<li>比特同步、比特编码</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>通信过程</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414161342.png" alt="" /></p>
+</li>
+</ol>
+<h3 id="tcpip"><a class="markdownIt-Anchor" href="#tcpip"></a> TCP/IP</h3>
+<ul>
+<li>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414174659.png" alt="" /></p>
+</li>
+<li>
+<p>与 OSI 的<strong>相同点</strong></p>
+<ul>
+<li>都分层</li>
+<li>都基于独立的协议栈概念</li>
+<li>可以实现异构网络互联互通</li>
+</ul>
+</li>
+<li>
+<p><strong>不同点</strong></p>
+<ul>
+<li>
+<p>OSI 定义三点：服务、协议、接口，TCP/IP 只有协议</p>
+</li>
+<li>
+<p>OSI 偏向特定协议</p>
+</li>
+<li>
+<p>TCP/IP 将 <code>IP</code>作为重要层次</p>
+</li>
+<li>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">OSI</th>
+<th style="text-align:center">TCP/IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">网络层</td>
+<td style="text-align:center">无连接+面向连接</td>
+<td style="text-align:center">无连接</td>
+</tr>
+<tr>
+<td style="text-align:center">传输层</td>
+<td style="text-align:center">面向连接</td>
+<td style="text-align:center">无连接+面向连接</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>面向连接</strong>分三个阶段：建立连接 → 数据传输 → 释放连接；<strong>无连接</strong>只有数据传输一个过程</p>
+</li>
+</ul>
+<h3 id="5-层参考模型"><a class="markdownIt-Anchor" href="#5-层参考模型"></a> 5 层参考模型</h3>
+<ul>
+<li><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414180250.png" alt="" /></li>
+<li><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414180327.png" alt="" /></li>
+</ul>
 ]]></content>
       <categories>
-        <category>BuildBlog</category>
+        <category>Study</category>
       </categories>
       <tags>
-        <tag>NexT</tag>
-        <tag>Hexo</tag>
+        <tag>网络</tag>
       </tags>
   </entry>
   <entry>
@@ -375,365 +638,193 @@
       </tags>
   </entry>
   <entry>
-    <title>计算机网络基本概念</title>
-    <url>/2020/04/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</url>
+    <title>NexT Valine 评论系统配置</title>
+    <url>/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/</url>
     <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5">基本概念</a></li>
-<li><a href="#%E5%88%86%E7%B1%BB">分类</a></li>
-<li><a href="#%E5%AF%BC%E5%9B%BE">导图</a></li>
-<li><a href="#%E5%88%86%E5%B1%82%E6%A6%82%E5%BF%B5">分层概念</a></li>
-<li><a href="#%E6%A8%A1%E5%9E%8B">模型</a>
-<ul>
-<li><a href="#osi">OSI</a></li>
-<li><a href="#tcpip">TCP/IP</a></li>
-<li><a href="#5-%E5%B1%82%E5%8F%82%E8%80%83%E6%A8%A1%E5%9E%8B">5 层参考模型</a></li>
-</ul>
-</li>
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8">创建应用</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE-appkey">配置 AppKey</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE">部署项目</a></li>
+<li><a href="#%E8%AF%84%E8%AE%BA%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86">评论数据管理</a></li>
+<li><a href="#%E8%AF%84%E8%AE%BA%E5%8A%9F%E8%83%BD%E5%85%B3%E9%97%AD">评论功能关闭</a></li>
+<li><a href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E8%AE%BE%E7%BD%AE">个性化设置</a></li>
 </ul>
 </p>
-<h1 id="计算机网络"><a class="markdownIt-Anchor" href="#计算机网络"></a> 计算机网络</h1>
-<h2 id="基本概念"><a class="markdownIt-Anchor" href="#基本概念"></a> 基本概念</h2>
-<ul>
-<li><strong>计算机网络</strong>：将分散、独立的<strong>计算机系统</strong>，通过<strong>通信设备</strong>和<strong>线路</strong>连接起来，由软件实现<strong>资源共享</strong>和<strong>信息传递</strong>的系统
-<ul>
-<li>是<strong>互连</strong>（互联互通）、<strong>自治</strong>（无主从关系）的计算机集合</li>
-</ul>
-</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413221407.png" alt="" /></p>
-<ul>
-<li>
-<p>功能</p>
-<ol>
-<li><strong>数据通信</strong>：连通性</li>
-<li><strong>资源共享</strong>：硬件、软件和数据的共享</li>
-<li>分布式处理：多台计算机分工完成项目</li>
-<li>提高可靠性：当网络中有设备宕机，及时实现替代机</li>
-<li>负载均衡</li>
-</ol>
-</li>
-<li>
-<p>组成</p>
+<h1 id="valine-评论系统配置"><a class="markdownIt-Anchor" href="#valine-评论系统配置"></a> Valine 评论系统配置</h1>
+<h2 id="创建应用"><a class="markdownIt-Anchor" href="#创建应用"></a> 创建应用</h2>
 <ol>
 <li>
-<p>组成划分：硬件、软件、协议</p>
+<p>进入<a href="https://www.leancloud.cn/" target="_blank" rel="noopener">LeanCloud</a>官网，点击右上角控制台，注册账号</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412195907.png" alt="" /></p>
 </li>
 <li>
-<p>工作方式</p>
-<ul>
-<li>边缘部分 用户直接使用 （<code>C/S</code>方式、<code>P2P</code>方式）</li>
-<li>核心部分 为边缘部分提供服务</li>
-</ul>
+<p>按要求验证邮箱和实名认证</p>
 </li>
 <li>
-<p><strong>功能组成</strong></p>
+<p>点击左上方<code>应用</code> → <code>创建应用</code>，填写应用名称（随意），选择开发版，创建</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200228.png" alt="" /></p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200814.png" alt="" /></p>
+</li>
+<li>
+<p>在面板可以看到新添加的应用</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201038.png" alt="" /></p>
 </li>
 </ol>
-</li>
-<li>
-<p>通信子网 <strong>数据通信</strong><br />
-- 资源子网 <strong>资源共享</strong>及数据处理</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413221825.png" alt="" /></p>
-</li>
-</ul>
-<h2 id="分类"><a class="markdownIt-Anchor" href="#分类"></a> 分类</h2>
-<ol>
-<li>适用范围
-<ul>
-<li>广域网<code>WAN</code>（交换技术）、城域网<code>MAN</code>、</li>
-<li>局域网<code>LAN</code>（广播技术）、个人区域网<code>PAN</code></li>
-</ul>
-</li>
-<li>使用者
-<ul>
-<li>公用网 （移动、联通）</li>
-<li>专用网 （军事、政府）</li>
-</ul>
-</li>
-<li>交换技术：电路交换、报文交换、分组交换</li>
-<li>拓扑结构：总线形、星形、环形、网状形（常用于广域网）</li>
-<li><strong>传输技术</strong>
-<ul>
-<li><strong>广播式</strong> 共享公共通信信道</li>
-<li><strong>点对点</strong> 使用 <em>分组存储转发</em> 和 <em>路由选择</em> 机制</li>
-</ul>
-</li>
-</ol>
-<h2 id="导图"><a class="markdownIt-Anchor" href="#导图"></a> 导图</h2>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414153126.png" alt="" /></p>
-<hr />
-<h1 id="评价指标"><a class="markdownIt-Anchor" href="#评价指标"></a> 评价指标</h1>
+<h2 id="配置-appkey"><a class="markdownIt-Anchor" href="#配置-appkey"></a> 配置 AppKey</h2>
 <ol>
 <li>
-<p><strong>速率</strong>（数据率、比特率）</p>
-<ul>
-<li>主机在数字信道上传送<strong>比特</strong><code>bit</code>数据的速率</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo separator="true">,</mo><mi>k</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo>⋯</mo></mrow><annotation encoding="application/x-tex">单位：b/s, kb/s \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span></li>
-<li>速率考虑的是<strong>比特传输</strong>，所以使用<code>b（bit）</code>；存储容量考虑量，使用<code>B（Byte 位）</code></li>
-</ul>
+<p>点击应用右上设置按钮，进入设置面板，点击左侧栏<code>设置</code> → <code>应用Keys</code>，分别<strong>保存<code>App ID</code> 与 <code>AppKey</code></strong></p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201401.png" alt="" /></p>
 </li>
 <li>
-<p><strong>带宽</strong></p>
-<ul>
-<li><strong>理想</strong>情况下，信道能达到的<strong>最高数据率</strong></li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo separator="true">,</mo><mi>k</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo>⋯</mo></mrow><annotation encoding="application/x-tex">单位：b/s, kb/s \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span></li>
-<li>反应网络的通信线路传送数据的能力</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414162906.png" alt="" /></p>
+<p>开启<code>git bash</code> 切换到站点主目录 <code>blog</code> ，<strong>编辑<code>themes/next/_config.yml</code></strong></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /themes/next/_config.yml</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p><strong>吞吐量</strong></p>
-<ul>
-<li>表示单位时间内通过某个网络（或<strong>信道</strong>、<strong>接口</strong>）的<strong>数据量</strong>，受带宽和网络额定速率限制</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo separator="true">,</mo><mi>k</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>s</mi><mo>⋯</mo></mrow><annotation encoding="application/x-tex">单位：b/s, kb/s \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span></li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413225407.png" alt="" /></p>
-</li>
-<li>
-<p><strong>时延</strong></p>
-<ul>
-<li>
-<p>数据（报文/分组/比特流）从网络一端传送到另一端的<strong>耗时</strong>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">单位：s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">s</span></span></span></span></p>
-</li>
-<li>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">总</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mi mathvariant="normal">发</mi><mi mathvariant="normal">送</mi><mi mathvariant="normal">（</mi><mi mathvariant="normal">传</mi><mi mathvariant="normal">输</mi><mi mathvariant="normal">）</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>+</mo><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>+</mo><mi mathvariant="normal">排</mi><mi mathvariant="normal">队</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>+</mo><mi mathvariant="normal">处</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi></mrow><annotation encoding="application/x-tex">总时延 = 发送（传输）时延+传播时延+排队时延+处理时延
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">总</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">发</span><span class="mord cjk_fallback">送</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">输</span><span class="mord cjk_fallback">）</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">排</span><span class="mord cjk_fallback">队</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">处</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span></span></span></span></span></p>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">发</mi><mi mathvariant="normal">送</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mfrac><mrow><mi mathvariant="normal">数</mi><mi mathvariant="normal">据</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><mrow><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">带</mi><mi mathvariant="normal">宽</mi><mi mathvariant="normal">（</mi><mi mathvariant="normal">发</mi><mi mathvariant="normal">送</mi><mi mathvariant="normal">速</mi><mi mathvariant="normal">率</mi><mi mathvariant="normal">）</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">发送时延 = \frac {数据长度} {信道带宽（发送速率）}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">发</span><span class="mord cjk_fallback">送</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.363em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.677em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">带</span><span class="mord cjk_fallback">宽</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">发</span><span class="mord cjk_fallback">送</span><span class="mord cjk_fallback">速</span><span class="mord cjk_fallback">率</span><span class="mord cjk_fallback">）</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">数</span><span class="mord cjk_fallback">据</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mfrac><mrow><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><mrow><mi mathvariant="normal">介</mi><mi mathvariant="normal">质</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">速</mi><mi mathvariant="normal">率</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">传播时延 = \frac {信道长度} {介质中传播速率}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.363em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.677em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">介</span><span class="mord cjk_fallback">质</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">速</span><span class="mord cjk_fallback">率</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-</li>
-<li>
-<p><strong>发送时延</strong>：数据处理为比特流的时间，发生在机器内</p>
-<ul>
-<li><strong>高速链路</strong>：发送速率极高，而<strong>不影响传播速率</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>传播速率</strong>：取决于<strong>电磁波传播</strong>速率和信道<strong>链路长度</strong>，发生在机器外</p>
-</li>
-<li>
-<p>排队时延：等待输入（输出）链路可用的时间（类似安检前排队）</p>
-</li>
-<li>
-<p>处理时延：检错，查找输出端（类似安检时扫描）</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>时延带宽积</strong></p>
-<ul>
-<li>以比特为单位的链路长度（即<strong>某段饱和链路现在有多少比特</strong>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">单</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">：</mi><mi>b</mi><mi>i</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">单位：bit</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord cjk_fallback">单</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">：</span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">t</span></span></span></span>）</li>
-<li>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mi mathvariant="normal">带</mi><mi mathvariant="normal">宽</mi><mi mathvariant="normal">积</mi><mo>=</mo><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>×</mo><mi mathvariant="normal">带</mi><mi mathvariant="normal">宽</mi></mrow><annotation encoding="application/x-tex">时延带宽积 = 传播时延 \times 带宽 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mord cjk_fallback">带</span><span class="mord cjk_fallback">宽</span><span class="mord cjk_fallback">积</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">带</span><span class="mord cjk_fallback">宽</span></span></span></span></span></p>
-</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413231202.png" alt="" /></p>
-</li>
-<li>
-<p><strong>往返时延</strong></p>
-<ul>
-<li>发送方发送数据 → 接收方接收数据 → 接收方发送确认信息 → 接收方收到确认 的<strong>全过程耗时</strong></li>
-<li>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">往</mi><mi mathvariant="normal">返</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>=</mo><mi mathvariant="normal">传</mi><mi mathvariant="normal">播</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">延</mi><mo>×</mo><mn>2</mn><mo>+</mo><mi mathvariant="normal">末</mi><mi mathvariant="normal">端</mi><mi mathvariant="normal">处</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">间</mi></mrow><annotation encoding="application/x-tex">往返时延 = 传播时延 \times 2 + 末端处理时间
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">往</span><span class="mord cjk_fallback">返</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">传</span><span class="mord cjk_fallback">播</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">延</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">末</span><span class="mord cjk_fallback">端</span><span class="mord cjk_fallback">处</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">间</span></span></span></span></span></p>
-</li>
-<li>往返时间越大，收到确认前，可以发送的数据就越多</li>
-</ul>
-</li>
-<li>
-<p><strong>利用率</strong></p>
-<ul>
-<li>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">利</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">率</mi><mo>=</mo><mfrac><mrow><mi mathvariant="normal">有</mi><mi mathvariant="normal">数</mi><mi mathvariant="normal">据</mi><mi mathvariant="normal">通</mi><mi mathvariant="normal">过</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">间</mi></mrow><mrow><mo stretchy="false">(</mo><mi mathvariant="normal">有</mi><mo>+</mo><mi mathvariant="normal">无</mi><mo stretchy="false">)</mo><mi mathvariant="normal">数</mi><mi mathvariant="normal">据</mi><mi mathvariant="normal">通</mi><mi mathvariant="normal">过</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">间</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">信道利用率 = \frac {有数据通过时间} {(有+无)数据通过时间}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">利</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">率</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.613em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.677em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord cjk_fallback">有</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord cjk_fallback">无</span><span class="mclose">)</span><span class="mord cjk_fallback">数</span><span class="mord cjk_fallback">据</span><span class="mord cjk_fallback">通</span><span class="mord cjk_fallback">过</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">间</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord cjk_fallback">有</span><span class="mord cjk_fallback">数</span><span class="mord cjk_fallback">据</span><span class="mord cjk_fallback">通</span><span class="mord cjk_fallback">过</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">间</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-</li>
-<li>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">网</mi><mi mathvariant="normal">络</mi><mi mathvariant="normal">利</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">率</mi><mo>=</mo><mi mathvariant="normal">信</mi><mi mathvariant="normal">道</mi><mi mathvariant="normal">利</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">率</mi><mi mathvariant="normal">加</mi><mi mathvariant="normal">权</mi><mi mathvariant="normal">平</mi><mi mathvariant="normal">均</mi><mi mathvariant="normal">值</mi></mrow><annotation encoding="application/x-tex">网络利用率 = 信道利用率加权平均值
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">网</span><span class="mord cjk_fallback">络</span><span class="mord cjk_fallback">利</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">率</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">道</span><span class="mord cjk_fallback">利</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">率</span><span class="mord cjk_fallback">加</span><span class="mord cjk_fallback">权</span><span class="mord cjk_fallback">平</span><span class="mord cjk_fallback">均</span><span class="mord cjk_fallback">值</span></span></span></span></span></p>
-</li>
-<li>
-<p><strong>利用率越高</strong>，信道上数据越饱和，<strong>时延就越大</strong></p>
-  <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200413232030.png" style="zoom:80%;" />
-</li>
-</ul>
+<p>查找到 <code>valine</code> 项，修改其 <code>enable</code> 值为 <code>true</code>，并将 <code>LeanCloud</code> 页面的 <code>AppID</code> 和 <code>appKey</code> 分别填入 <code>enable</code> 下方两项 <code>appid</code> 和 <code>appkey</code></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span>  <span class="comment"># 是否启用 valine 评论系统</span></span><br><span class="line">  appid: XXXXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<h1 id="分层模型"><a class="markdownIt-Anchor" href="#分层模型"></a> 分层模型</h1>
-<h2 id="分层概念"><a class="markdownIt-Anchor" href="#分层概念"></a> 分层概念</h2>
+<h2 id="部署项目"><a class="markdownIt-Anchor" href="#部署项目"></a> 部署项目</h2>
 <ol>
 <li>
-<p>原则</p>
-<ul>
-<li>各层<strong>独立</strong>，实现相对独立的一种功能</li>
-<li>各层<strong>界面自然清晰</strong>，耦合尽可能少</li>
-<li>结构分割，各采用<strong>最合适的技术</strong>实现</li>
-<li>保持下层对上层独立，<strong>上层单向使用层提供的服务</strong></li>
-<li>整个分层结构促进标准化工作</li>
-</ul>
+<p>修改配置文件后， 保存退出</p>
 </li>
 <li>
-<p>成分</p>
-<ul>
-<li><strong>实体</strong>：第n层的活动元素称为n层实体，接收与发送端同一层的实体称为<strong>对等实体</strong></li>
-<li><strong>协议</strong>：为对等实体交换而设立的规则、<strong>标准</strong> 【水平方向】</li>
-<li><strong>接口</strong>：<strong>访问服务点SAP</strong>，上层使用下层服务的<strong>入口</strong></li>
-<li><strong>服务</strong>：下层为相邻上层提供的<strong>功能调用</strong></li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414150323.png" alt="" /></p>
+<p>在主目录 <code>blog</code> 下，执行 <code>hexo clean &amp;&amp; hexo s</code>，重新生成页面</p>
 </li>
 <li>
-<p>数据单元</p>
-<ul>
-<li><code>SDU</code>数据单元：完成用户所需功能而应传送的数据</li>
-<li><code>PCI</code>协议控制信息：控制协议操作的信息</li>
-<li><code>PDU</code>协议数据单元：<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mi>D</mi><mi>U</mi><mo>=</mo><mi>P</mi><mi>C</mi><mi>I</mi><mo>+</mo><mi>S</mi><mi>D</mi><mi>U</mi></mrow><annotation encoding="application/x-tex">PDU = PCI + SDU</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mord mathdefault" style="margin-right:0.02778em;">D</span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.02778em;">D</span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span>，本层次传送的数据单位</li>
-<li>本层本次传送的是<code>PDU</code>，作为下次接收的<code>SDU</code></li>
-</ul>
- <img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414160147.png" style="zoom:70%;" />
+<p>浏览器使用 <code>http://localhost:4000</code> 进入本地页面查看添加效果</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412203157.png" alt="" /></p>
 </li>
 <li>
-<p>要点</p>
-<ul>
-<li>每层遵循某些<strong>网络协议</strong>完成本层功能</li>
-<li>计算机网络体系结构是<strong>分层结构</strong>，是计网的<strong>各层及其协议的集合</strong></li>
-<li>每层提供给上层的服务不只是本身的功能，还有其下层的功能</li>
-<li>仅在<strong>相邻层</strong>之间有接口，提供的具体服务细节对上一层<strong>完全屏蔽</strong></li>
-</ul>
+<p>执行 <code>hexo clean &amp;&amp; hexo g -d</code> 可直接部署到远端</p>
 </li>
 </ol>
-<h2 id="模型"><a class="markdownIt-Anchor" href="#模型"></a> 模型</h2>
-<h3 id="osi"><a class="markdownIt-Anchor" href="#osi"></a> OSI</h3>
+<h2 id="评论数据管理"><a class="markdownIt-Anchor" href="#评论数据管理"></a> 评论数据管理</h2>
 <ol>
 <li>
-<p><strong>OSI 七层模型</strong>：应 表 会 传 网 数 物</p>
-<ul>
-<li>前四层端对端，后三层点对点</li>
-<li>中途的交换机只有<strong>后三层</strong></li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414161202.jpg" alt="" /></p>
+<p>进入 <code>LeanCloud</code>，登录账号</p>
 </li>
 <li>
-<p>各层功能</p>
-<ul>
-<li>应：<strong>用户与网络交互</strong>，服务有文件传输<code>FTP</code>、电子邮件<code>SMTP</code>、万维网<code>HTTP</code></li>
-<li>表：<strong>数据加工</strong>
-<ul>
-<li>格式变换 （文字 → 比特）</li>
-<li>加密解密 （敏感信息加密处理）</li>
-<li>压缩恢复 （视频图像流）</li>
-</ul>
-</li>
-<li>会：建立<strong>会话/同步</strong>，向表示层实体/用户进程提供<strong>建立连接</strong>，并基于连接，<strong>有序传输</strong>数据
-<ul>
-<li>建立、管理、终止会话 （区分、分隔不同应用进程）</li>
-<li><strong>校验点</strong>，正在通信失效时读档重传 （是用于传输大文件）</li>
-</ul>
-</li>
-<li>传：本机与目标机的进程通信，即<strong>端对端</strong>的通信，传输单位是<strong>报文段或用户数据报</strong>
-<ul>
-<li><strong>决定</strong>可靠/不可靠传输 （确认重传机制）</li>
-<li><strong>差错控制</strong>，查验纠正接收到的数据报</li>
-<li><strong>流量控制</strong>，协调收发两方的数据传输速率</li>
-<li><strong>复用分用</strong>，不同进程的消息放<strong>同一个报文段</strong>发送，到达目标机后，按<strong>端口号</strong>分离发往目标进程</li>
-</ul>
-</li>
-<li>网：将报文<strong>分组</strong>从源端传送到目的端，为交换网上的不同主机提供服务，传输单位是<strong>数据报</strong>
-<ul>
-<li><strong>路由选择</strong>，选择传输所用的路由线路，查找<strong>最佳路线</strong></li>
-<li><strong>流量控制</strong>、<strong>差错控制</strong>，同上层，重复是因为交换机没有传输层，所以网络层也要维持限流和检错功能</li>
-<li><strong>拥塞控制</strong>，所有结点来不及接受分组而要大量丢弃分组就称为<strong>拥塞</strong>状态，网络层要采取一定缓解措施</li>
-</ul>
-</li>
-<li>数：数据报<strong>封装成帧</strong>，传输单位是<strong>帧</strong>
-<ul>
-<li><strong>成帧</strong>，定义帧的开始（首部）与结束（尾部）</li>
-<li><strong>差错控制</strong>，帧错 + 位错</li>
-<li>流量控制，同上</li>
-<li><strong>访问（接入）控制</strong>，控制各设备对共享信道的使用 （如广播式同一时间只允许一个设备发送数据报）</li>
-</ul>
-</li>
-<li>物：在<strong>物理媒体</strong>上实现<strong>比特流</strong>的<strong>透明传输</strong>（不论数据的比特组合，一律支持传送）
-<ul>
-<li>定义接口特性 （硬件层面的接口）</li>
-<li>定义传输模式，<strong>单工、双工、半双工</strong></li>
-<li>定义传输速率</li>
-<li>比特同步、比特编码</li>
-</ul>
-</li>
-</ul>
+<p>点击用于存储评论的应用，进入其管理界面</p>
 </li>
 <li>
-<p>通信过程</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414161342.png" alt="" /></p>
+<p>选择 <code>存储</code> → <code>结构化数据</code> → <code>Comment</code>，即可在管理端实现数据增删查改</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412210207.png" alt="" /></p>
 </li>
 </ol>
-<h3 id="tcpip"><a class="markdownIt-Anchor" href="#tcpip"></a> TCP/IP</h3>
+<h2 id="评论功能关闭"><a class="markdownIt-Anchor" href="#评论功能关闭"></a> 评论功能关闭</h2>
 <ul>
 <li>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414174659.png" alt="" /></p>
+<p>关闭特定文章的评论功能只需在其 <code>Front Matter</code> 中，添加 <code>comments: false</code></p>
 </li>
 <li>
-<p>与 OSI 的<strong>相同点</strong></p>
-<ul>
-<li>都分层</li>
-<li>都基于独立的协议栈概念</li>
-<li>可以实现异构网络互联互通</li>
+<p>关闭指定页面（如分类、标签页）的评论功能，则需进入页面目录，编辑其 <code>index.md</code> 文件，同样添加 <code>Front Matter</code> 的 <code>comments</code>项</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/&lt;pageName&gt;/index.md</span><br></pre></td></tr></table></figure>
+</li>
 </ul>
+<h2 id="个性化设置"><a class="markdownIt-Anchor" href="#个性化设置"></a> 个性化设置</h2>
+<p><code>NexT</code> 主题配置文件中支持更多关于 <code>Valine</code> 的其他配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  appid: XXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br><span class="line">  notify: <span class="literal">false</span> <span class="comment"># 邮件通知</span></span><br><span class="line">  verify: <span class="literal">false</span> <span class="comment"># 验证码</span></span><br><span class="line">  placeholder: Just go go <span class="comment"># 输入文本框占位符</span></span><br><span class="line">  avatar: mm <span class="comment"># 头像风格</span></span><br><span class="line">  guest_info: nick,mail,link <span class="comment"># 用户信息栏</span></span><br><span class="line">  pageSize: 10 <span class="comment"># 分页大小</span></span><br><span class="line">  language: <span class="comment"># 语言, 可用值: en, zh-cn</span></span><br><span class="line">  visitor: <span class="literal">false</span> <span class="comment"># 文章阅读统计</span></span><br><span class="line">  comment_count: <span class="literal">true</span> <span class="comment"># If false, comment count will only be displayed in post page, not in home page</span></span><br><span class="line">  recordIP: <span class="literal">false</span> <span class="comment"># Whether to record the commenter IP</span></span><br><span class="line">  serverURLs: <span class="comment"># When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)</span></span><br><span class="line">  <span class="comment">#post_meta_order: 0</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>BuildBlog</category>
+      </categories>
+      <tags>
+        <tag>NexT</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NexT Valine 留言板页面配置</title>
+    <url>/2020/04/12/NexT%20%E7%95%99%E8%A8%80%E6%9D%BF%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E9%9D%A2">创建页面</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">修改配置文件</a></li>
+<li><a href="#valine-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%93%8D%E4%BD%9C">Valine 配置与操作</a></li>
+<li><a href="#%E6%9C%80%E5%90%8E%E9%83%A8%E7%BD%B2">最后部署</a></li>
+<li><a href="#%E5%A4%87%E6%B3%A8">备注</a></li>
+</ul>
+</p>
+<h1 id="next-valine-留言板页面配置"><a class="markdownIt-Anchor" href="#next-valine-留言板页面配置"></a> NexT Valine 留言板页面配置</h1>
+<blockquote>
+<p>留言板生成本质可以视为新建一个自定义页面，操作过程与标签、分类页的创建大同小异</p>
+</blockquote>
+<h2 id="创建页面"><a class="markdownIt-Anchor" href="#创建页面"></a> 创建页面</h2>
+<ol>
+<li>
+<p>在网站主目录 <code>blog</code>下执行 <code>hexo new page GuestBook</code></p>
+<blockquote>
+<p>INFO  Created: D:\blog\source\GuestBook\<a href="http://index.md" target="_blank" rel="noopener">index.md</a></p>
+</blockquote>
 </li>
 <li>
-<p><strong>不同点</strong></p>
-<ul>
+<p>编辑新页面的 <code>index.md</code> 文件，修改其 <code>Front Matter</code>，添加 <code>type</code> 项</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/GuestBook/index.md</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: GuestBook</span><br><span class="line">date: 2020-04-12 22:35:28</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"GuestBook"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="修改配置文件"><a class="markdownIt-Anchor" href="#修改配置文件"></a> 修改配置文件</h2>
+<ol>
 <li>
-<p>OSI 定义三点：服务、协议、接口，TCP/IP 只有协议</p>
+<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 中仿照已有格式添加 <code>GuestBook</code></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment"># about: /about/ || fa fa-user</span></span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  <span class="comment"># 按已有格式 添加GuestBook项</span></span><br><span class="line">  GuestBook: /GuestBook/ || fa fa-paper-plane</span><br></pre></td></tr></table></figure>
 </li>
 <li>
-<p>OSI 偏向特定协议</p>
-</li>
-<li>
-<p>TCP/IP 将 <code>IP</code>作为重要层次</p>
-</li>
-<li>
+<p>规定格式为 <code>&lt;menuName&gt;: /&lt;dirName&gt;/ || &lt;link&gt; &lt;iconName&gt;</code></p>
 <table>
 <thead>
 <tr>
-<th style="text-align:center"></th>
-<th style="text-align:center">OSI</th>
-<th style="text-align:center">TCP/IP</th>
+<th style="text-align:center">选项</th>
+<th style="text-align:center">说明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">网络层</td>
-<td style="text-align:center">无连接+面向连接</td>
-<td style="text-align:center">无连接</td>
+<td style="text-align:center">menuName</td>
+<td style="text-align:center">显示在页面菜单栏中的页面名</td>
 </tr>
 <tr>
-<td style="text-align:center">传输层</td>
-<td style="text-align:center">面向连接</td>
-<td style="text-align:center">无连接+面向连接</td>
+<td style="text-align:center">dirName</td>
+<td style="text-align:center"><code>hexo new page</code> 时，使用的页面名</td>
+</tr>
+<tr>
+<td style="text-align:center">link</td>
+<td style="text-align:center">指向网站内相对URL的图标目标链接，初始使用 <code>fa</code></td>
+</tr>
+<tr>
+<td style="text-align:center">iconName</td>
+<td style="text-align:center">图标名称，可自行替换其它，<code>fa</code> 使用的是 <a href="https://fontawesome.com/" target="_blank" rel="noopener"><code>Font Awesome</code></a></td>
 </tr>
 </tbody>
 </table>
 </li>
-</ul>
+</ol>
+<h2 id="valine-配置与操作"><a class="markdownIt-Anchor" href="#valine-配置与操作"></a> Valine 配置与操作</h2>
+<p>详细请参见博客：<a href="https://easttang.github.io/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">NexT Valine 评论系统配置</a></p>
+<h2 id="最后部署"><a class="markdownIt-Anchor" href="#最后部署"></a> 最后部署</h2>
+<ol>
+<li>
+<p>修改保存后，先执行 <code>hexo clean &amp;&amp; hexo s</code>  在本地界面 <code>http://local:4000</code> 查看效果</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412231418.png" alt="" /></p>
 </li>
 <li>
-<p><strong>面向连接</strong>分三个阶段：建立连接 → 数据传输 → 释放连接；<strong>无连接</strong>只有数据传输一个过程</p>
+<p>后执行 <code>hexo clean &amp;&amp; hexo g -d</code> 生成新页面文件，并部署到远端</p>
 </li>
-</ul>
-<h3 id="5-层参考模型"><a class="markdownIt-Anchor" href="#5-层参考模型"></a> 5 层参考模型</h3>
+</ol>
+<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
 <ul>
-<li><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414180250.png" alt="" /></li>
-<li><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200414180327.png" alt="" /></li>
+<li>菜单栏中<code>GuestBook</code>可以修改名称，同样只需修改主题配置文件 <code>themes/next/_config.yml</code>的 <code>menu</code> 项，将添加的 <code>&lt;menuName&gt;</code>即 <code>GuestBook</code> 替换即可，只修改冒号前的即可。为保证稳定性，建议若修改为中文，可以考虑将站点语言设为 <code>en</code></li>
+<li>如有需要，其他自定义页面配置方法与此类似</li>
 </ul>
 ]]></content>
       <categories>
-        <category>Study</category>
+        <category>BuildBlog</category>
       </categories>
       <tags>
-        <tag>网络</tag>
+        <tag>NexT</tag>
+        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
@@ -916,98 +1007,6 @@
         <category>BuildBlog</category>
       </categories>
       <tags>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NexT Valine 留言板页面配置</title>
-    <url>/2020/04/12/NexT%20%E7%95%99%E8%A8%80%E6%9D%BF%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E9%9D%A2">创建页面</a></li>
-<li><a href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">修改配置文件</a></li>
-<li><a href="#valine-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%93%8D%E4%BD%9C">Valine 配置与操作</a></li>
-<li><a href="#%E6%9C%80%E5%90%8E%E9%83%A8%E7%BD%B2">最后部署</a></li>
-<li><a href="#%E5%A4%87%E6%B3%A8">备注</a></li>
-</ul>
-</p>
-<h1 id="next-valine-留言板页面配置"><a class="markdownIt-Anchor" href="#next-valine-留言板页面配置"></a> NexT Valine 留言板页面配置</h1>
-<blockquote>
-<p>留言板生成本质可以视为新建一个自定义页面，操作过程与标签、分类页的创建大同小异</p>
-</blockquote>
-<h2 id="创建页面"><a class="markdownIt-Anchor" href="#创建页面"></a> 创建页面</h2>
-<ol>
-<li>
-<p>在网站主目录 <code>blog</code>下执行 <code>hexo new page GuestBook</code></p>
-<blockquote>
-<p>INFO  Created: D:\blog\source\GuestBook\<a href="http://index.md" target="_blank" rel="noopener">index.md</a></p>
-</blockquote>
-</li>
-<li>
-<p>编辑新页面的 <code>index.md</code> 文件，修改其 <code>Front Matter</code>，添加 <code>type</code> 项</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/GuestBook/index.md</span><br></pre></td></tr></table></figure>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: GuestBook</span><br><span class="line">date: 2020-04-12 22:35:28</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"GuestBook"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h2 id="修改配置文件"><a class="markdownIt-Anchor" href="#修改配置文件"></a> 修改配置文件</h2>
-<ol>
-<li>
-<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 中仿照已有格式添加 <code>GuestBook</code></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment"># about: /about/ || fa fa-user</span></span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  <span class="comment"># 按已有格式 添加GuestBook项</span></span><br><span class="line">  GuestBook: /GuestBook/ || fa fa-paper-plane</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>规定格式为 <code>&lt;menuName&gt;: /&lt;dirName&gt;/ || &lt;link&gt; &lt;iconName&gt;</code></p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">选项</th>
-<th style="text-align:center">说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">menuName</td>
-<td style="text-align:center">显示在页面菜单栏中的页面名</td>
-</tr>
-<tr>
-<td style="text-align:center">dirName</td>
-<td style="text-align:center"><code>hexo new page</code> 时，使用的页面名</td>
-</tr>
-<tr>
-<td style="text-align:center">link</td>
-<td style="text-align:center">指向网站内相对URL的图标目标链接，初始使用 <code>fa</code></td>
-</tr>
-<tr>
-<td style="text-align:center">iconName</td>
-<td style="text-align:center">图标名称，可自行替换其它，<code>fa</code> 使用的是 <a href="https://fontawesome.com/" target="_blank" rel="noopener"><code>Font Awesome</code></a></td>
-</tr>
-</tbody>
-</table>
-</li>
-</ol>
-<h2 id="valine-配置与操作"><a class="markdownIt-Anchor" href="#valine-配置与操作"></a> Valine 配置与操作</h2>
-<p>详细请参见博客：<a href="https://easttang.github.io/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">NexT Valine 评论系统配置</a></p>
-<h2 id="最后部署"><a class="markdownIt-Anchor" href="#最后部署"></a> 最后部署</h2>
-<ol>
-<li>
-<p>修改保存后，先执行 <code>hexo clean &amp;&amp; hexo s</code>  在本地界面 <code>http://local:4000</code> 查看效果</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412231418.png" alt="" /></p>
-</li>
-<li>
-<p>后执行 <code>hexo clean &amp;&amp; hexo g -d</code> 生成新页面文件，并部署到远端</p>
-</li>
-</ol>
-<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
-<ul>
-<li>菜单栏中<code>GuestBook</code>可以修改名称，同样只需修改主题配置文件 <code>themes/next/_config.yml</code>的 <code>menu</code> 项，将添加的 <code>&lt;menuName&gt;</code>即 <code>GuestBook</code> 替换即可，只修改冒号前的即可。为保证稳定性，建议若修改为中文，可以考虑将站点语言设为 <code>en</code></li>
-<li>如有需要，其他自定义页面配置方法与此类似</li>
-</ul>
-]]></content>
-      <categories>
-        <category>BuildBlog</category>
-      </categories>
-      <tags>
-        <tag>NexT</tag>
         <tag>Hexo</tag>
       </tags>
   </entry>
