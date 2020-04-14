@@ -1,6 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>NexT Valine 评论系统配置</title>
+    <url>/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8">创建应用</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE-appkey">配置 AppKey</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE">部署项目</a></li>
+<li><a href="#%E8%AF%84%E8%AE%BA%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86">评论数据管理</a></li>
+<li><a href="#%E8%AF%84%E8%AE%BA%E5%8A%9F%E8%83%BD%E5%85%B3%E9%97%AD">评论功能关闭</a></li>
+<li><a href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E8%AE%BE%E7%BD%AE">个性化设置</a></li>
+</ul>
+</p>
+<h1 id="valine-评论系统配置"><a class="markdownIt-Anchor" href="#valine-评论系统配置"></a> Valine 评论系统配置</h1>
+<h2 id="创建应用"><a class="markdownIt-Anchor" href="#创建应用"></a> 创建应用</h2>
+<ol>
+<li>
+<p>进入<a href="https://www.leancloud.cn/" target="_blank" rel="noopener">LeanCloud</a>官网，点击右上角控制台，注册账号</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412195907.png" alt="" /></p>
+</li>
+<li>
+<p>按要求验证邮箱和实名认证</p>
+</li>
+<li>
+<p>点击左上方<code>应用</code> → <code>创建应用</code>，填写应用名称（随意），选择开发版，创建</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200228.png" alt="" /></p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200814.png" alt="" /></p>
+</li>
+<li>
+<p>在面板可以看到新添加的应用</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201038.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="配置-appkey"><a class="markdownIt-Anchor" href="#配置-appkey"></a> 配置 AppKey</h2>
+<ol>
+<li>
+<p>点击应用右上设置按钮，进入设置面板，点击左侧栏<code>设置</code> → <code>应用Keys</code>，分别<strong>保存<code>App ID</code> 与 <code>AppKey</code></strong></p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201401.png" alt="" /></p>
+</li>
+<li>
+<p>开启<code>git bash</code> 切换到站点主目录 <code>blog</code> ，<strong>编辑<code>themes/next/_config.yml</code></strong></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /themes/next/_config.yml</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>查找到 <code>valine</code> 项，修改其 <code>enable</code> 值为 <code>true</code>，并将 <code>LeanCloud</code> 页面的 <code>AppID</code> 和 <code>appKey</code> 分别填入 <code>enable</code> 下方两项 <code>appid</code> 和 <code>appkey</code></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span>  <span class="comment"># 是否启用 valine 评论系统</span></span><br><span class="line">  appid: XXXXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="部署项目"><a class="markdownIt-Anchor" href="#部署项目"></a> 部署项目</h2>
+<ol>
+<li>
+<p>修改配置文件后， 保存退出</p>
+</li>
+<li>
+<p>在主目录 <code>blog</code> 下，执行 <code>hexo clean &amp;&amp; hexo s</code>，重新生成页面</p>
+</li>
+<li>
+<p>浏览器使用 <code>http://localhost:4000</code> 进入本地页面查看添加效果</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412203157.png" alt="" /></p>
+</li>
+<li>
+<p>执行 <code>hexo clean &amp;&amp; hexo g -d</code> 可直接部署到远端</p>
+</li>
+</ol>
+<h2 id="评论数据管理"><a class="markdownIt-Anchor" href="#评论数据管理"></a> 评论数据管理</h2>
+<ol>
+<li>
+<p>进入 <code>LeanCloud</code>，登录账号</p>
+</li>
+<li>
+<p>点击用于存储评论的应用，进入其管理界面</p>
+</li>
+<li>
+<p>选择 <code>存储</code> → <code>结构化数据</code> → <code>Comment</code>，即可在管理端实现数据增删查改</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412210207.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="评论功能关闭"><a class="markdownIt-Anchor" href="#评论功能关闭"></a> 评论功能关闭</h2>
+<ul>
+<li>
+<p>关闭特定文章的评论功能只需在其 <code>Front Matter</code> 中，添加 <code>comments: false</code></p>
+</li>
+<li>
+<p>关闭指定页面（如分类、标签页）的评论功能，则需进入页面目录，编辑其 <code>index.md</code> 文件，同样添加 <code>Front Matter</code> 的 <code>comments</code>项</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/&lt;pageName&gt;/index.md</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="个性化设置"><a class="markdownIt-Anchor" href="#个性化设置"></a> 个性化设置</h2>
+<p><code>NexT</code> 主题配置文件中支持更多关于 <code>Valine</code> 的其他配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  appid: XXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br><span class="line">  notify: <span class="literal">false</span> <span class="comment"># 邮件通知</span></span><br><span class="line">  verify: <span class="literal">false</span> <span class="comment"># 验证码</span></span><br><span class="line">  placeholder: Just go go <span class="comment"># 输入文本框占位符</span></span><br><span class="line">  avatar: mm <span class="comment"># 头像风格</span></span><br><span class="line">  guest_info: nick,mail,link <span class="comment"># 用户信息栏</span></span><br><span class="line">  pageSize: 10 <span class="comment"># 分页大小</span></span><br><span class="line">  language: <span class="comment"># 语言, 可用值: en, zh-cn</span></span><br><span class="line">  visitor: <span class="literal">false</span> <span class="comment"># 文章阅读统计</span></span><br><span class="line">  comment_count: <span class="literal">true</span> <span class="comment"># If false, comment count will only be displayed in post page, not in home page</span></span><br><span class="line">  recordIP: <span class="literal">false</span> <span class="comment"># Whether to record the commenter IP</span></span><br><span class="line">  serverURLs: <span class="comment"># When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)</span></span><br><span class="line">  <span class="comment">#post_meta_order: 0</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>BuildBlog</category>
+      </categories>
+      <tags>
+        <tag>NexT</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hexo NexT 主题配置</title>
     <url>/2020/04/12/Hexo%20Next%20%E4%B8%BB%E9%A2%98/</url>
     <content><![CDATA[<p><ul class="markdownIt-TOC">
@@ -266,379 +364,6 @@
 <h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
 <ul>
 <li>参考：<a href="https://theme-next.org/docs/getting-started/" target="_blank" rel="noopener">NexT v6.0+ 官方文档</a>，<a href="http://theme-next.iissnan.com/getting-started.html" target="_blank" rel="noopener">NexT v5.1中文文档</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>BuildBlog</category>
-      </categories>
-      <tags>
-        <tag>NexT</tag>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NexT Valine 评论系统配置</title>
-    <url>/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8">创建应用</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE-appkey">配置 AppKey</a></li>
-<li><a href="#%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE">部署项目</a></li>
-<li><a href="#%E8%AF%84%E8%AE%BA%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86">评论数据管理</a></li>
-<li><a href="#%E8%AF%84%E8%AE%BA%E5%8A%9F%E8%83%BD%E5%85%B3%E9%97%AD">评论功能关闭</a></li>
-<li><a href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E8%AE%BE%E7%BD%AE">个性化设置</a></li>
-</ul>
-</p>
-<h1 id="valine-评论系统配置"><a class="markdownIt-Anchor" href="#valine-评论系统配置"></a> Valine 评论系统配置</h1>
-<h2 id="创建应用"><a class="markdownIt-Anchor" href="#创建应用"></a> 创建应用</h2>
-<ol>
-<li>
-<p>进入<a href="https://www.leancloud.cn/" target="_blank" rel="noopener">LeanCloud</a>官网，点击右上角控制台，注册账号</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412195907.png" alt="" /></p>
-</li>
-<li>
-<p>按要求验证邮箱和实名认证</p>
-</li>
-<li>
-<p>点击左上方<code>应用</code> → <code>创建应用</code>，填写应用名称（随意），选择开发版，创建</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200228.png" alt="" /></p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412200814.png" alt="" /></p>
-</li>
-<li>
-<p>在面板可以看到新添加的应用</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201038.png" alt="" /></p>
-</li>
-</ol>
-<h2 id="配置-appkey"><a class="markdownIt-Anchor" href="#配置-appkey"></a> 配置 AppKey</h2>
-<ol>
-<li>
-<p>点击应用右上设置按钮，进入设置面板，点击左侧栏<code>设置</code> → <code>应用Keys</code>，分别<strong>保存<code>App ID</code> 与 <code>AppKey</code></strong></p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412201401.png" alt="" /></p>
-</li>
-<li>
-<p>开启<code>git bash</code> 切换到站点主目录 <code>blog</code> ，<strong>编辑<code>themes/next/_config.yml</code></strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /themes/next/_config.yml</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>查找到 <code>valine</code> 项，修改其 <code>enable</code> 值为 <code>true</code>，并将 <code>LeanCloud</code> 页面的 <code>AppID</code> 和 <code>appKey</code> 分别填入 <code>enable</code> 下方两项 <code>appid</code> 和 <code>appkey</code></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span>  <span class="comment"># 是否启用 valine 评论系统</span></span><br><span class="line">  appid: XXXXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h2 id="部署项目"><a class="markdownIt-Anchor" href="#部署项目"></a> 部署项目</h2>
-<ol>
-<li>
-<p>修改配置文件后， 保存退出</p>
-</li>
-<li>
-<p>在主目录 <code>blog</code> 下，执行 <code>hexo clean &amp;&amp; hexo s</code>，重新生成页面</p>
-</li>
-<li>
-<p>浏览器使用 <code>http://localhost:4000</code> 进入本地页面查看添加效果</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412203157.png" alt="" /></p>
-</li>
-<li>
-<p>执行 <code>hexo clean &amp;&amp; hexo g -d</code> 可直接部署到远端</p>
-</li>
-</ol>
-<h2 id="评论数据管理"><a class="markdownIt-Anchor" href="#评论数据管理"></a> 评论数据管理</h2>
-<ol>
-<li>
-<p>进入 <code>LeanCloud</code>，登录账号</p>
-</li>
-<li>
-<p>点击用于存储评论的应用，进入其管理界面</p>
-</li>
-<li>
-<p>选择 <code>存储</code> → <code>结构化数据</code> → <code>Comment</code>，即可在管理端实现数据增删查改</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412210207.png" alt="" /></p>
-</li>
-</ol>
-<h2 id="评论功能关闭"><a class="markdownIt-Anchor" href="#评论功能关闭"></a> 评论功能关闭</h2>
-<ul>
-<li>
-<p>关闭特定文章的评论功能只需在其 <code>Front Matter</code> 中，添加 <code>comments: false</code></p>
-</li>
-<li>
-<p>关闭指定页面（如分类、标签页）的评论功能，则需进入页面目录，编辑其 <code>index.md</code> 文件，同样添加 <code>Front Matter</code> 的 <code>comments</code>项</p>
-  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/&lt;pageName&gt;/index.md</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="个性化设置"><a class="markdownIt-Anchor" href="#个性化设置"></a> 个性化设置</h2>
-<p><code>NexT</code> 主题配置文件中支持更多关于 <code>Valine</code> 的其他配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Valine</span></span><br><span class="line"><span class="comment"># For more information: https://valine.js.org, https://github.com/xCss/Valine</span></span><br><span class="line">valine:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  appid: XXXXXXX <span class="comment"># Your leancloud application appid</span></span><br><span class="line">  appkey: XXXXXXX <span class="comment"># Your leancloud application appkey</span></span><br><span class="line">  notify: <span class="literal">false</span> <span class="comment"># 邮件通知</span></span><br><span class="line">  verify: <span class="literal">false</span> <span class="comment"># 验证码</span></span><br><span class="line">  placeholder: Just go go <span class="comment"># 输入文本框占位符</span></span><br><span class="line">  avatar: mm <span class="comment"># 头像风格</span></span><br><span class="line">  guest_info: nick,mail,link <span class="comment"># 用户信息栏</span></span><br><span class="line">  pageSize: 10 <span class="comment"># 分页大小</span></span><br><span class="line">  language: <span class="comment"># 语言, 可用值: en, zh-cn</span></span><br><span class="line">  visitor: <span class="literal">false</span> <span class="comment"># 文章阅读统计</span></span><br><span class="line">  comment_count: <span class="literal">true</span> <span class="comment"># If false, comment count will only be displayed in post page, not in home page</span></span><br><span class="line">  recordIP: <span class="literal">false</span> <span class="comment"># Whether to record the commenter IP</span></span><br><span class="line">  serverURLs: <span class="comment"># When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)</span></span><br><span class="line">  <span class="comment">#post_meta_order: 0</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>BuildBlog</category>
-      </categories>
-      <tags>
-        <tag>NexT</tag>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Win10 GitHub Hexo 搭建个人博客</title>
-    <url>/2020/03/31/Win10%20%20Hexo%20%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E7%8E%AF%E5%A2%83">环境</a></li>
-<li><a href="#%E5%88%9D%E6%AD%A5%E6%90%AD%E5%BB%BA">初步搭建</a></li>
-<li><a href="#%E5%8F%91%E5%B8%83%E6%96%87%E7%AB%A0">发布文章</a></li>
-<li><a href="#%E9%83%A8%E7%BD%B2%E8%BF%9C%E7%AB%AF">部署远端</a></li>
-<li><a href="#%E5%A4%87%E6%B3%A8">备注</a>
-<ul>
-<li><a href="#%E9%85%8D%E7%BD%AEssh">配置SSH</a></li>
-<li><a href="#%E6%9D%82%E9%A1%B9">杂项</a></li>
-</ul>
-</li>
-<li><a href="#%E6%84%9F%E8%B0%A2">感谢</a></li>
-</ul>
-</p>
-<hr />
-<h1 id="win10-github-hexo-搭建个人博客"><a class="markdownIt-Anchor" href="#win10-github-hexo-搭建个人博客"></a> Win10 GitHub Hexo 搭建个人博客</h1>
-<h2 id="环境"><a class="markdownIt-Anchor" href="#环境"></a> 环境</h2>
-<ul>
-<li>git    2.26.0</li>
-<li>node.js    12.16.1</li>
-<li>npm    6.13.4</li>
-</ul>
-<h2 id="初步搭建"><a class="markdownIt-Anchor" href="#初步搭建"></a> 初步搭建</h2>
-<ol>
-<li>
-<p>更换淘宝源，<code>npm install -g cnpm --registry=https://registry.npm.taobao.org</code></p>
-<p>若出现 <code>WARN mkdirp</code>（如下图），可视心情决定执行 <code>cnpm install -g mkdirp</code> 更新 <code>mkdirp</code> 版本</p>
- <img src="https://i.loli.net/2020/03/31/qDK7ezYS2wIVgAn.png" style="zoom:80%;" />
-</li>
-<li>
-<p><code>cnpm -v</code> 验证换源结果</p>
- <img src="https://i.loli.net/2020/03/31/fLwVHJQ6ymEevZk.png" style="zoom:80%;" />
-</li>
-<li>
-<p><code>cnpm install -g hexo-cli</code> 安装 Hexo</p>
- <img src="https://i.loli.net/2020/03/31/Z1qzRaIeoMDgPQ2.png" style="zoom:70%;" />
-</li>
-<li>
-<p><code>hexo -v</code> 验证安装结果</p>
- <img src="https://i.loli.net/2020/03/31/8JXGocheK2LaPZq.png" style="zoom:80%;" />
-</li>
-<li>
-<p>在自定义位置创建文件夹，作为<strong>博客归档</strong>位置</p>
-</li>
-<li>
-<p><code>cd &lt;dirname&gt;(如 blog)</code> 进入文件夹目录，执行 <code>hexo init</code> 进行初始化</p>
- <img src="https://i.loli.net/2020/03/31/M8O1vfGoYq39zxF.png" style="zoom:100%;" />
-</li>
-<li>
-<p><code>dir</code> 查看目录，有文件生成即可</p>
- <img src="https://i.loli.net/2020/03/31/mksoWudBpMCQxXR.png" style="zoom:80%;" />
-</li>
-<li>
-<p><code>hexo s</code> 启动 Hexo</p>
- <img src="https://i.loli.net/2020/03/31/y2lNXHxe5I3U1FG.png" style="zoom:100%;" />
-</li>
-<li>
-<p>在浏览器中使用 <code>http://localhost:4000</code> 访问博客页面</p>
- <img src="https://i.loli.net/2020/03/31/miFJO7TktwK5cQP.png" style="zoom:37%;" />
-<hr />
-</li>
-</ol>
-<h2 id="发布文章"><a class="markdownIt-Anchor" href="#发布文章"></a> 发布文章</h2>
-<ol>
-<li>
-<p><code>Crtl+C</code>强制终止或关闭cmd窗口，切换到<code>Git Bash</code>，主要是较熟悉Shell窗口的操作，可以根据自身需要选择继续使用cmd</p>
-</li>
-<li>
-<p><strong>确保进入到博客归档目录</strong>，<code>hexo n &lt;fileName&gt;</code><strong>创建新文件</strong>，不指定后缀名则默认<code>.md</code>文件，创建的文件默认位于<code>./source/_post/</code></p>
- <img src="https://i.loli.net/2020/03/31/UxjtOV2YsMFpl9f.png" style="zoom:100%;" />
-</li>
-<li>
-<p><code>cd source/_posts/</code> 切换到文章所在目录，使用<code>vim</code>等编辑器写入文章内容</p>
- <img src="https://i.loli.net/2020/03/31/8afQhSLTUkgHrzP.png" style="zoom:100%;" />
-</li>
-<li>
-<p><strong>切换回归档目录</strong>，<code>hexo clean</code> <strong>清除存档</strong>，<code>hexo g</code> <strong>重新生成页面</strong>，可以看到最后是新添加的文章</p>
- <img src="https://i.loli.net/2020/03/31/eGN7uklYP8yRngp.png" style="zoom:67%;" />
- <img src="https://i.loli.net/2020/03/31/1i3VqSvhm4XBnDs.png" style="zoom:60%;" />
-</li>
-<li>
-<p><code>hexo s</code> <strong>重新建立连接</strong>，在浏览器查看修改效果，可以看到新博客生成</p>
- <img src="https://i.loli.net/2020/03/31/1IGgieS8UzXAm3J.png" style="zoom:100%;" />
-<hr />
-</li>
-</ol>
-<h2 id="部署远端"><a class="markdownIt-Anchor" href="#部署远端"></a> 部署远端</h2>
-<ol>
-<li>
-<p>在 GitHub 上建立一个<strong>空仓库</strong>，<strong>仓库名为 <code>&lt;username&gt;.github.io</code></strong>，<code>&lt;username&gt;</code> 是用户名，<code>.github.io</code> 不可改变</p>
- <img src="https://i.loli.net/2020/03/31/8vreVHtd27hncmE.png" style="zoom:100%;" />
-</li>
-<li>
-<p><code>cnpm install --save hexo-deployer-git</code> <strong>安装扩展</strong></p>
-<p><img src="https://i.loli.net/2020/03/31/m7rczy3QDOJvYXS.png" alt="" /></p>
-</li>
-<li>
-<p><code>vim _config.yml</code>设置 <code>_config.yml</code> 文件，<strong>修改文件末尾的 <code>Deployment</code></strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repo: https://github.com/&lt;userName&gt;/&lt;userName&gt;.github.io</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
-<p><img src="https://i.loli.net/2020/03/31/kYop13nMRt2lqWm.png" alt="" /></p>
-</li>
-<li>
-<p>运行 <code>hexo d</code> <strong>实现部署</strong>，期间可能会出现 Github 登录窗口，填写登录即可</p>
- <img src="https://i.loli.net/2020/03/31/rvVELdaHO9NmPnA.png" style="zoom:33%;" />
- <img src="https://i.loli.net/2020/03/31/LjqigUKsxboahXQ.png" style="zoom:100%;" />
-</li>
-<li>
-<p>配置成功后，刷新 GitHub 对应空仓库即可看见新加入的文件</p>
-<p><img src="https://i.loli.net/2020/03/31/yhVS5iMqOgdG8nl.png" alt="" /></p>
-</li>
-<li>
-<p>此时浏览器使用 <code>https://&lt;userName&gt;.github.io/</code>即可访问，<strong>注意是 <code>https</code></strong></p>
-<p><img src="https://i.loli.net/2020/03/31/3KXBEFe2U7ftsDZ.png" alt="image-20200331230620119" /></p>
-<p><img src="https://i.loli.net/2020/03/31/Lw2auRZnSTQBE8H.png" alt="image-20200331230645440" /></p>
-</li>
-<li>
-<p>至此，博客搭建基本完成，后续博文添加可<strong>将文件放在 <code>source/_posts/</code> 目录下</strong>，然后运行命令 <strong><code>hexo g</code> 生成更新文件</strong>，<strong><code>hexo d</code> 重新部署</strong>到 GitHub 仓库中，即可实现更新。</p>
-<p><img src="https://i.loli.net/2020/03/31/g1UNyIJ4QivH9ah.png" alt="image-20200331232445188" /></p>
-<hr />
-</li>
-</ol>
-<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
-<h3 id="配置ssh"><a class="markdownIt-Anchor" href="#配置ssh"></a> 配置SSH</h3>
-<ol>
-<li>
-<p>发现使用<code>http</code>部署，在上传时往往需要重新输入 Github 账号密码，而使用 SSH 配置则不需要，且更稳定。以下是具体步骤</p>
-</li>
-<li>
-<p>开启 <code>git bash</code> 进入 <code>blog</code> 目录，执行 <code>git init</code> 初始化</p>
-</li>
-<li>
-<p>执行<code>ssh-keygen -t rsa -C &quot;&lt;emailAddress（注册所用邮箱名）&gt;&quot;</code>可在<strong>系统用户目录</strong>创建隐藏<code>.ssh</code>文件夹，回车默认设置即可。完成后<code>.ssh</code>文件夹中有<code>id_rsa</code>和<code>id_rsa.pub</code>文件，<strong>其中<code>.pub</code>是公钥</strong>。如果已经存在这些文件，跳过该步骤</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411192808.png" alt="" /></p>
-</li>
-<li>
-<p>在 GitHub 账户头像下拉菜单的 <strong>settings <strong>中选择 <strong><code>SSH and GPG key</code> → <code>New SSH Key</code></strong>。标题任意，Key 复制</strong><code>id_rsa.pub</code>内容</strong>。添加成功后<code>SSH keys</code>即可见到加入项</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411193258.png" alt="" /></p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411193533.png" alt="" /></p>
-</li>
-<li>
-<p>返回 <strong><code>blog</code> 目录</strong>的 <code>gitbash</code> 设置 <code>_config.yml</code> 文件，修改文件末尾的 <code>Deployment</code>。</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411195600.png" alt="" /></p>
-</li>
-<li>
-<p>修改 <code>ropo</code> 项为 <strong><code>git@github.com:&lt;userName&gt;/&lt;userName&gt;.github.io.git</code></strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repo: git@github.com:&lt;userName&gt;/&lt;userName&gt;.github.io</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411195214.png" alt="" /></p>
-</li>
-<li>
-<p>修改后保存退出，即可再次尝试上传博文验证修改结果。</p>
-</li>
-</ol>
-<h3 id="杂项"><a class="markdownIt-Anchor" href="#杂项"></a> 杂项</h3>
-<ul>
-<li>
-<p>网络原因，实测更新会有一段时间的<strong>延迟</strong>，请耐心等待几分钟再刷新。验证是否更新成功，可以在 GitHub 相应仓库中查看文件夹更新时间</p>
-</li>
-<li>
-<p>更换主题，会在另外的文章再行介绍</p>
-</li>
-<li>
-<p>上传命令可直接简化为 <strong><code>hexo g -d</code></strong></p>
-</li>
-<li>
-<p>如果是外部博客文件注意添加<strong>使用 <code>YAML Front Matter</code></strong>，否则<code>hexo</code>无法准确识别</p>
-<hr />
-</li>
-</ul>
-<h2 id="感谢"><a class="markdownIt-Anchor" href="#感谢"></a> 感谢</h2>
-<ul>
-<li><a href="https://www.bilibili.com/video/BV1Yb411a7ty/" target="_blank" rel="noopener">参考视频</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>BuildBlog</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NexT Valine 留言板页面配置</title>
-    <url>/2020/04/12/NexT%20%E7%95%99%E8%A8%80%E6%9D%BF%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<p><ul class="markdownIt-TOC">
-<li><a href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E9%9D%A2">创建页面</a></li>
-<li><a href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">修改配置文件</a></li>
-<li><a href="#valine-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%93%8D%E4%BD%9C">Valine 配置与操作</a></li>
-<li><a href="#%E6%9C%80%E5%90%8E%E9%83%A8%E7%BD%B2">最后部署</a></li>
-<li><a href="#%E5%A4%87%E6%B3%A8">备注</a></li>
-</ul>
-</p>
-<h1 id="next-valine-留言板页面配置"><a class="markdownIt-Anchor" href="#next-valine-留言板页面配置"></a> NexT Valine 留言板页面配置</h1>
-<blockquote>
-<p>留言板生成本质可以视为新建一个自定义页面，操作过程与标签、分类页的创建大同小异</p>
-</blockquote>
-<h2 id="创建页面"><a class="markdownIt-Anchor" href="#创建页面"></a> 创建页面</h2>
-<ol>
-<li>
-<p>在网站主目录 <code>blog</code>下执行 <code>hexo new page GuestBook</code></p>
-<blockquote>
-<p>INFO  Created: D:\blog\source\GuestBook\<a href="http://index.md" target="_blank" rel="noopener">index.md</a></p>
-</blockquote>
-</li>
-<li>
-<p>编辑新页面的 <code>index.md</code> 文件，修改其 <code>Front Matter</code>，添加 <code>type</code> 项</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/GuestBook/index.md</span><br></pre></td></tr></table></figure>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: GuestBook</span><br><span class="line">date: 2020-04-12 22:35:28</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"GuestBook"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h2 id="修改配置文件"><a class="markdownIt-Anchor" href="#修改配置文件"></a> 修改配置文件</h2>
-<ol>
-<li>
-<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 中仿照已有格式添加 <code>GuestBook</code></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment"># about: /about/ || fa fa-user</span></span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  <span class="comment"># 按已有格式 添加GuestBook项</span></span><br><span class="line">  GuestBook: /GuestBook/ || fa fa-paper-plane</span><br></pre></td></tr></table></figure>
-</li>
-<li>
-<p>规定格式为 <code>&lt;menuName&gt;: /&lt;dirName&gt;/ || &lt;link&gt; &lt;iconName&gt;</code></p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">选项</th>
-<th style="text-align:center">说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">menuName</td>
-<td style="text-align:center">显示在页面菜单栏中的页面名</td>
-</tr>
-<tr>
-<td style="text-align:center">dirName</td>
-<td style="text-align:center"><code>hexo new page</code> 时，使用的页面名</td>
-</tr>
-<tr>
-<td style="text-align:center">link</td>
-<td style="text-align:center">指向网站内相对URL的图标目标链接，初始使用 <code>fa</code></td>
-</tr>
-<tr>
-<td style="text-align:center">iconName</td>
-<td style="text-align:center">图标名称，可自行替换其它，<code>fa</code> 使用的是 <a href="https://fontawesome.com/" target="_blank" rel="noopener"><code>Font Awesome</code></a></td>
-</tr>
-</tbody>
-</table>
-</li>
-</ol>
-<h2 id="valine-配置与操作"><a class="markdownIt-Anchor" href="#valine-配置与操作"></a> Valine 配置与操作</h2>
-<p>详细请参见博客：<a href="https://easttang.github.io/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">NexT Valine 评论系统配置</a></p>
-<h2 id="最后部署"><a class="markdownIt-Anchor" href="#最后部署"></a> 最后部署</h2>
-<ol>
-<li>
-<p>修改保存后，先执行 <code>hexo clean &amp;&amp; hexo s</code>  在本地界面 <code>http://local:4000</code> 查看效果</p>
-<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412231418.png" alt="" /></p>
-</li>
-<li>
-<p>后执行 <code>hexo clean &amp;&amp; hexo g -d</code> 生成新页面文件，并部署到远端</p>
-</li>
-</ol>
-<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
-<ul>
-<li>菜单栏中<code>GuestBook</code>可以修改名称，同样只需修改主题配置文件 <code>themes/next/_config.yml</code>的 <code>menu</code> 项，将添加的 <code>&lt;menuName&gt;</code>即 <code>GuestBook</code> 替换即可，只修改冒号前的即可。为保证稳定性，建议若修改为中文，可以考虑将站点语言设为 <code>en</code></li>
-<li>如有需要，其他自定义页面配置方法与此类似</li>
 </ul>
 ]]></content>
       <categories>
@@ -1009,6 +734,281 @@
       </categories>
       <tags>
         <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Win10 GitHub Hexo 搭建个人博客</title>
+    <url>/2020/03/31/Win10%20%20Hexo%20%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p><ul class="markdownIt-TOC">
+<li><a href="#%E7%8E%AF%E5%A2%83">环境</a></li>
+<li><a href="#%E5%88%9D%E6%AD%A5%E6%90%AD%E5%BB%BA">初步搭建</a></li>
+<li><a href="#%E5%8F%91%E5%B8%83%E6%96%87%E7%AB%A0">发布文章</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2%E8%BF%9C%E7%AB%AF">部署远端</a></li>
+<li><a href="#%E5%A4%87%E6%B3%A8">备注</a>
+<ul>
+<li><a href="#%E9%85%8D%E7%BD%AEssh">配置SSH</a></li>
+<li><a href="#%E6%9D%82%E9%A1%B9">杂项</a></li>
+</ul>
+</li>
+<li><a href="#%E6%84%9F%E8%B0%A2">感谢</a></li>
+</ul>
+</p>
+<hr />
+<h1 id="win10-github-hexo-搭建个人博客"><a class="markdownIt-Anchor" href="#win10-github-hexo-搭建个人博客"></a> Win10 GitHub Hexo 搭建个人博客</h1>
+<h2 id="环境"><a class="markdownIt-Anchor" href="#环境"></a> 环境</h2>
+<ul>
+<li>git    2.26.0</li>
+<li>node.js    12.16.1</li>
+<li>npm    6.13.4</li>
+</ul>
+<h2 id="初步搭建"><a class="markdownIt-Anchor" href="#初步搭建"></a> 初步搭建</h2>
+<ol>
+<li>
+<p>更换淘宝源，<code>npm install -g cnpm --registry=https://registry.npm.taobao.org</code></p>
+<p>若出现 <code>WARN mkdirp</code>（如下图），可视心情决定执行 <code>cnpm install -g mkdirp</code> 更新 <code>mkdirp</code> 版本</p>
+ <img src="https://i.loli.net/2020/03/31/qDK7ezYS2wIVgAn.png" style="zoom:80%;" />
+</li>
+<li>
+<p><code>cnpm -v</code> 验证换源结果</p>
+ <img src="https://i.loli.net/2020/03/31/fLwVHJQ6ymEevZk.png" style="zoom:80%;" />
+</li>
+<li>
+<p><code>cnpm install -g hexo-cli</code> 安装 Hexo</p>
+ <img src="https://i.loli.net/2020/03/31/Z1qzRaIeoMDgPQ2.png" style="zoom:70%;" />
+</li>
+<li>
+<p><code>hexo -v</code> 验证安装结果</p>
+ <img src="https://i.loli.net/2020/03/31/8JXGocheK2LaPZq.png" style="zoom:80%;" />
+</li>
+<li>
+<p>在自定义位置创建文件夹，作为<strong>博客归档</strong>位置</p>
+</li>
+<li>
+<p><code>cd &lt;dirname&gt;(如 blog)</code> 进入文件夹目录，执行 <code>hexo init</code> 进行初始化</p>
+ <img src="https://i.loli.net/2020/03/31/M8O1vfGoYq39zxF.png" style="zoom:100%;" />
+</li>
+<li>
+<p><code>dir</code> 查看目录，有文件生成即可</p>
+ <img src="https://i.loli.net/2020/03/31/mksoWudBpMCQxXR.png" style="zoom:80%;" />
+</li>
+<li>
+<p><code>hexo s</code> 启动 Hexo</p>
+ <img src="https://i.loli.net/2020/03/31/y2lNXHxe5I3U1FG.png" style="zoom:100%;" />
+</li>
+<li>
+<p>在浏览器中使用 <code>http://localhost:4000</code> 访问博客页面</p>
+ <img src="https://i.loli.net/2020/03/31/miFJO7TktwK5cQP.png" style="zoom:37%;" />
+<hr />
+</li>
+</ol>
+<h2 id="发布文章"><a class="markdownIt-Anchor" href="#发布文章"></a> 发布文章</h2>
+<ol>
+<li>
+<p><code>Crtl+C</code>强制终止或关闭cmd窗口，切换到<code>Git Bash</code>，主要是较熟悉Shell窗口的操作，可以根据自身需要选择继续使用cmd</p>
+</li>
+<li>
+<p><strong>确保进入到博客归档目录</strong>，<code>hexo n &lt;fileName&gt;</code><strong>创建新文件</strong>，不指定后缀名则默认<code>.md</code>文件，创建的文件默认位于<code>./source/_post/</code></p>
+ <img src="https://i.loli.net/2020/03/31/UxjtOV2YsMFpl9f.png" style="zoom:100%;" />
+</li>
+<li>
+<p><code>cd source/_posts/</code> 切换到文章所在目录，使用<code>vim</code>等编辑器写入文章内容</p>
+ <img src="https://i.loli.net/2020/03/31/8afQhSLTUkgHrzP.png" style="zoom:100%;" />
+</li>
+<li>
+<p><strong>切换回归档目录</strong>，<code>hexo clean</code> <strong>清除存档</strong>，<code>hexo g</code> <strong>重新生成页面</strong>，可以看到最后是新添加的文章</p>
+ <img src="https://i.loli.net/2020/03/31/eGN7uklYP8yRngp.png" style="zoom:67%;" />
+ <img src="https://i.loli.net/2020/03/31/1i3VqSvhm4XBnDs.png" style="zoom:60%;" />
+</li>
+<li>
+<p><code>hexo s</code> <strong>重新建立连接</strong>，在浏览器查看修改效果，可以看到新博客生成</p>
+ <img src="https://i.loli.net/2020/03/31/1IGgieS8UzXAm3J.png" style="zoom:100%;" />
+<hr />
+</li>
+</ol>
+<h2 id="部署远端"><a class="markdownIt-Anchor" href="#部署远端"></a> 部署远端</h2>
+<ol>
+<li>
+<p>在 GitHub 上建立一个<strong>空仓库</strong>，<strong>仓库名为 <code>&lt;username&gt;.github.io</code></strong>，<code>&lt;username&gt;</code> 是用户名，<code>.github.io</code> 不可改变</p>
+ <img src="https://i.loli.net/2020/03/31/8vreVHtd27hncmE.png" style="zoom:100%;" />
+</li>
+<li>
+<p><code>cnpm install --save hexo-deployer-git</code> <strong>安装扩展</strong></p>
+<p><img src="https://i.loli.net/2020/03/31/m7rczy3QDOJvYXS.png" alt="" /></p>
+</li>
+<li>
+<p><code>vim _config.yml</code>设置 <code>_config.yml</code> 文件，<strong>修改文件末尾的 <code>Deployment</code></strong></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repo: https://github.com/&lt;userName&gt;/&lt;userName&gt;.github.io</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p><img src="https://i.loli.net/2020/03/31/kYop13nMRt2lqWm.png" alt="" /></p>
+</li>
+<li>
+<p>运行 <code>hexo d</code> <strong>实现部署</strong>，期间可能会出现 Github 登录窗口，填写登录即可</p>
+ <img src="https://i.loli.net/2020/03/31/rvVELdaHO9NmPnA.png" style="zoom:33%;" />
+ <img src="https://i.loli.net/2020/03/31/LjqigUKsxboahXQ.png" style="zoom:100%;" />
+</li>
+<li>
+<p>配置成功后，刷新 GitHub 对应空仓库即可看见新加入的文件</p>
+<p><img src="https://i.loli.net/2020/03/31/yhVS5iMqOgdG8nl.png" alt="" /></p>
+</li>
+<li>
+<p>此时浏览器使用 <code>https://&lt;userName&gt;.github.io/</code>即可访问，<strong>注意是 <code>https</code></strong></p>
+<p><img src="https://i.loli.net/2020/03/31/3KXBEFe2U7ftsDZ.png" alt="image-20200331230620119" /></p>
+<p><img src="https://i.loli.net/2020/03/31/Lw2auRZnSTQBE8H.png" alt="image-20200331230645440" /></p>
+</li>
+<li>
+<p>至此，博客搭建基本完成，后续博文添加可<strong>将文件放在 <code>source/_posts/</code> 目录下</strong>，然后运行命令 <strong><code>hexo g</code> 生成更新文件</strong>，<strong><code>hexo d</code> 重新部署</strong>到 GitHub 仓库中，即可实现更新。</p>
+<p><img src="https://i.loli.net/2020/03/31/g1UNyIJ4QivH9ah.png" alt="image-20200331232445188" /></p>
+<hr />
+</li>
+</ol>
+<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
+<h3 id="配置ssh"><a class="markdownIt-Anchor" href="#配置ssh"></a> 配置SSH</h3>
+<ol>
+<li>
+<p>发现使用<code>http</code>部署，在上传时往往需要重新输入 Github 账号密码，而使用 SSH 配置则不需要，且更稳定。以下是具体步骤</p>
+</li>
+<li>
+<p>开启 <code>git bash</code> 进入 <code>blog</code> 目录，执行 <code>git init</code> 初始化</p>
+</li>
+<li>
+<p>执行<code>ssh-keygen -t rsa -C &quot;&lt;emailAddress（注册所用邮箱名）&gt;&quot;</code>可在<strong>系统用户目录</strong>创建隐藏<code>.ssh</code>文件夹，回车默认设置即可。完成后<code>.ssh</code>文件夹中有<code>id_rsa</code>和<code>id_rsa.pub</code>文件，<strong>其中<code>.pub</code>是公钥</strong>。如果已经存在这些文件，跳过该步骤</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411192808.png" alt="" /></p>
+</li>
+<li>
+<p>在 GitHub 账户头像下拉菜单的 <strong>settings <strong>中选择 <strong><code>SSH and GPG key</code> → <code>New SSH Key</code></strong>。标题任意，Key 复制</strong><code>id_rsa.pub</code>内容</strong>。添加成功后<code>SSH keys</code>即可见到加入项</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411193258.png" alt="" /></p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411193533.png" alt="" /></p>
+</li>
+<li>
+<p>返回 <strong><code>blog</code> 目录</strong>的 <code>gitbash</code> 设置 <code>_config.yml</code> 文件，修改文件末尾的 <code>Deployment</code>。</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411195600.png" alt="" /></p>
+</li>
+<li>
+<p>修改 <code>ropo</code> 项为 <strong><code>git@github.com:&lt;userName&gt;/&lt;userName&gt;.github.io.git</code></strong></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repo: git@github.com:&lt;userName&gt;/&lt;userName&gt;.github.io</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200411195214.png" alt="" /></p>
+</li>
+<li>
+<p>修改后保存退出，即可再次尝试上传博文验证修改结果。</p>
+</li>
+</ol>
+<h3 id="杂项"><a class="markdownIt-Anchor" href="#杂项"></a> 杂项</h3>
+<ul>
+<li>
+<p>网络原因，实测更新会有一段时间的<strong>延迟</strong>，请耐心等待几分钟再刷新。验证是否更新成功，可以在 GitHub 相应仓库中查看文件夹更新时间</p>
+</li>
+<li>
+<p>更换主题，会在另外的文章再行介绍</p>
+</li>
+<li>
+<p>上传命令可直接简化为 <strong><code>hexo g -d</code></strong></p>
+</li>
+<li>
+<p>如果是外部博客文件注意添加<strong>使用 <code>YAML Front Matter</code></strong>，否则<code>hexo</code>无法准确识别</p>
+<hr />
+</li>
+</ul>
+<h2 id="感谢"><a class="markdownIt-Anchor" href="#感谢"></a> 感谢</h2>
+<ul>
+<li><a href="https://www.bilibili.com/video/BV1Yb411a7ty/" target="_blank" rel="noopener">参考视频</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>BuildBlog</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NexT Valine 留言板页面配置</title>
+    <url>/2020/04/12/NexT%20%E7%95%99%E8%A8%80%E6%9D%BF%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E9%9D%A2">创建页面</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">修改配置文件</a></li>
+<li><a href="#valine-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%93%8D%E4%BD%9C">Valine 配置与操作</a></li>
+<li><a href="#%E6%9C%80%E5%90%8E%E9%83%A8%E7%BD%B2">最后部署</a></li>
+<li><a href="#%E5%A4%87%E6%B3%A8">备注</a></li>
+</ul>
+</p>
+<h1 id="next-valine-留言板页面配置"><a class="markdownIt-Anchor" href="#next-valine-留言板页面配置"></a> NexT Valine 留言板页面配置</h1>
+<blockquote>
+<p>留言板生成本质可以视为新建一个自定义页面，操作过程与标签、分类页的创建大同小异</p>
+</blockquote>
+<h2 id="创建页面"><a class="markdownIt-Anchor" href="#创建页面"></a> 创建页面</h2>
+<ol>
+<li>
+<p>在网站主目录 <code>blog</code>下执行 <code>hexo new page GuestBook</code></p>
+<blockquote>
+<p>INFO  Created: D:\blog\source\GuestBook\<a href="http://index.md" target="_blank" rel="noopener">index.md</a></p>
+</blockquote>
+</li>
+<li>
+<p>编辑新页面的 <code>index.md</code> 文件，修改其 <code>Front Matter</code>，添加 <code>type</code> 项</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim <span class="built_in">source</span>/GuestBook/index.md</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: GuestBook</span><br><span class="line">date: 2020-04-12 22:35:28</span><br><span class="line"><span class="built_in">type</span>: <span class="string">"GuestBook"</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="修改配置文件"><a class="markdownIt-Anchor" href="#修改配置文件"></a> 修改配置文件</h2>
+<ol>
+<li>
+<p>编辑主题配置文件 <code>themes/next/_config.yml</code>，在 <code>menu</code> 中仿照已有格式添加 <code>GuestBook</code></p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim themes/next/_config.yml</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  <span class="comment"># about: /about/ || fa fa-user</span></span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  <span class="comment"># 按已有格式 添加GuestBook项</span></span><br><span class="line">  GuestBook: /GuestBook/ || fa fa-paper-plane</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>规定格式为 <code>&lt;menuName&gt;: /&lt;dirName&gt;/ || &lt;link&gt; &lt;iconName&gt;</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">选项</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">menuName</td>
+<td style="text-align:center">显示在页面菜单栏中的页面名</td>
+</tr>
+<tr>
+<td style="text-align:center">dirName</td>
+<td style="text-align:center"><code>hexo new page</code> 时，使用的页面名</td>
+</tr>
+<tr>
+<td style="text-align:center">link</td>
+<td style="text-align:center">指向网站内相对URL的图标目标链接，初始使用 <code>fa</code></td>
+</tr>
+<tr>
+<td style="text-align:center">iconName</td>
+<td style="text-align:center">图标名称，可自行替换其它，<code>fa</code> 使用的是 <a href="https://fontawesome.com/" target="_blank" rel="noopener"><code>Font Awesome</code></a></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<h2 id="valine-配置与操作"><a class="markdownIt-Anchor" href="#valine-配置与操作"></a> Valine 配置与操作</h2>
+<p>详细请参见博客：<a href="https://easttang.github.io/2020/04/12/NexT%20Valine%20%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">NexT Valine 评论系统配置</a></p>
+<h2 id="最后部署"><a class="markdownIt-Anchor" href="#最后部署"></a> 最后部署</h2>
+<ol>
+<li>
+<p>修改保存后，先执行 <code>hexo clean &amp;&amp; hexo s</code>  在本地界面 <code>http://local:4000</code> 查看效果</p>
+<p><img src="https://raw.githubusercontent.com/EastTang/FigureBed/master/img/20200412231418.png" alt="" /></p>
+</li>
+<li>
+<p>后执行 <code>hexo clean &amp;&amp; hexo g -d</code> 生成新页面文件，并部署到远端</p>
+</li>
+</ol>
+<h2 id="备注"><a class="markdownIt-Anchor" href="#备注"></a> 备注</h2>
+<ul>
+<li>菜单栏中<code>GuestBook</code>可以修改名称，同样只需修改主题配置文件 <code>themes/next/_config.yml</code>的 <code>menu</code> 项，将添加的 <code>&lt;menuName&gt;</code>即 <code>GuestBook</code> 替换即可，只修改冒号前的即可。为保证稳定性，建议若修改为中文，可以考虑将站点语言设为 <code>en</code></li>
+<li>如有需要，其他自定义页面配置方法与此类似</li>
+</ul>
+]]></content>
+      <categories>
+        <category>BuildBlog</category>
+      </categories>
+      <tags>
+        <tag>NexT</tag>
+        <tag>Hexo</tag>
       </tags>
   </entry>
 </search>
