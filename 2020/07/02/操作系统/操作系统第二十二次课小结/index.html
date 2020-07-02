@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://i.loli.net/2020/07/02/vrHNeAIGSXpwK8d.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/wHtaS9RNvJ4G13m.jpg">
 <meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-07-02T07:27:35.899Z">
+<meta property="article:modified_time" content="2020-07-02T08:30:48.095Z">
 <meta property="article:author" content="Tang">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：15:27:35" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：16:30:48" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -384,11 +384,9 @@
 </ul>
 <h3 id="中断处理程序"><a class="markdownIt-Anchor" href="#中断处理程序"></a> 中断处理程序</h3>
 <ul>
-<li>
-<p>I/O 任务完成时，I/O 控制器会发送一个<strong>中断信号</strong>，系统根据<strong>中断信号类型</strong>找到相应的<strong>中断处理程序</strong>并执行</p>
-  <div id="flowchart-0" class="flow-chart"></div>
-</li>
+<li>I/O 任务完成时，I/O 控制器会发送一个<strong>中断信号</strong>，系统根据<strong>中断信号类型</strong>找到相应的<strong>中断处理程序</strong>并执行</li>
 </ul>
+<div id="flowchart-0" class="flow-chart"></div>
 <h3 id="注意事项"><a class="markdownIt-Anchor" href="#注意事项"></a> 注意事项</h3>
 <ul>
 <li>理解并记住 I/O 软件<strong>各层次之间的顺序</strong>，判断某个处理应该是<strong>在哪个层次完成</strong>的（常考设备独立性软件、设备驱动程序）</li>
@@ -426,9 +424,9 @@
 </li>
 <li>
 <p><strong>流程</strong></p>
-  <div id="flowchart-1" class="flow-chart"></div>
 </li>
 </ul>
+<div id="flowchart-1" class="flow-chart"></div>
 <h4 id="输入输出井"><a class="markdownIt-Anchor" href="#输入输出井"></a> 输入/输出井</h4>
 <ul>
 <li>模拟脱机输入/输出时的<strong>磁带</strong>，收容 I/O 设备输入 或 输出到设备 的数据</li>
@@ -468,23 +466,23 @@
 </li>
 </ul>
 <h4 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h4>
-<p><img src="https://i.loli.net/2020/07/02/wHtaS9RNvJ4G13m.jpg" alt="假脱机技术06小结" /><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">    op1=>operation: 从控制器读出设备状态
-    op2=>operation: 从设备中读入一个字的数据
-    				并经由CPU放到内存缓冲区中
-    				(此处说明中断程序也与硬件交流)
-    op3=>operation: 根据异常原因做出相应处理
-    cond=>condition: I/O正常结束
-    op1->cond
-    cond(yes)->op2
-    cond(no)->op3</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">    op1=>operation: 慢速 I 设备
-    op2=>operation: 外围控制机（输入）
-    op3=>operation: 磁带（输入）
-    op4=>operation: CPU
-    op5=>operation: 磁带（输出）
-    op6=>operation: 外围控制机（输出）
-    op7=>operation: 慢速 O 设备
-    op1(right)->op2(right)->op3->op4->op5
-    op5(right)->op6(right)->op7</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script></p>
+<p><img src="https://i.loli.net/2020/07/02/wHtaS9RNvJ4G13m.jpg" alt="假脱机技术06小结" /><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">op1=>operation: 从控制器读出设备状态
+op2=>operation: 从设备中读入一个字的数据
+  				并经由CPU放到内存缓冲区中
+  				(此处说明中断程序也与硬件交流)
+op3=>operation: 根据异常原因做出相应处理
+cond=>condition: I/O正常结束
+op1->cond
+cond(yes)->op2
+cond(no)->op3</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">op1=>operation: 慢速 I 设备
+op2=>operation: 外围控制机（输入）
+op3=>operation: 磁带（输入）
+op4=>operation: CPU
+op5=>operation: 磁带（输出）
+op6=>operation: 外围控制机（输出）
+op7=>operation: 慢速 O 设备
+op1(right)->op2(right)->op3->op4->op5
+op5(right)->op6(right)->op7</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script></p>
 
     </div>
 
@@ -503,8 +501,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%85%AB%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-8-实现临界区同步访问">
-      <i class="fa fa-chevron-left"></i> OS-8-实现临界区同步访问
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-23-设备回收与分配 缓冲区管理">
+      <i class="fa fa-chevron-left"></i> OS-23-设备回收与分配 缓冲区管理
     </a></div>
       <div class="post-nav-item">
     <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%B8%80%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-21-I/O设备与控制">
@@ -702,6 +700,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   
