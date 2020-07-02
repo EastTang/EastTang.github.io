@@ -27,19 +27,20 @@
 <meta property="og:site_name" content="Tang&#39;s Blog">
 <meta property="og:description" content="请求分页地址变换机制	页面置换算法（最佳&#x2F;FIFO&#x2F;LRU&#x2F;NRU&#x2F;CLOCK）	页面分配策略（工作集、驻留集）">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://i.loli.net/2020/07/02/RePjfO3d28Jam6F.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/8ZaMotEpzjbQlhG.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/RePjfO3d28Jam6F.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/Ht9dsLxuT8bqZcK.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/RePjfO3d28Jam6F.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/wAMJqnEVXb8gCur.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/XgmFe3PiobRchOQ.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/xUBZL1gWEnb5KD6.png">
-<meta property="og:image" content="https://i.loli.net/2020/07/02/Ht9dsLxuT8bqZcK.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/TFfdnoOj8cq9gyB.png">
 <meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-07-02T06:47:30.796Z">
+<meta property="article:modified_time" content="2020-07-02T07:12:04.621Z">
 <meta property="article:author" content="Tang">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://i.loli.net/2020/07/02/RePjfO3d28Jam6F.png">
+<meta name="twitter:image" content="https://i.loli.net/2020/07/02/8ZaMotEpzjbQlhG.png">
 
 <link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%83%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
 
@@ -224,7 +225,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:30" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：15:12:04" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -391,11 +392,22 @@
 <ul>
 <li>具有<strong>快表</strong>机构的请求分页系统中，若访问逻辑地址发生<strong>缺页</strong>，则地址变换步骤为：
 <ol>
-<li>查快表（未命中）</li>
-<li>查慢表（发现未调入内存，缺页中断）</li>
-<li>调页（调入页会加入<strong>快、慢表</strong>）</li>
-<li><strong>查快表</strong>（命中）</li>
-<li>访问目标内存单元</li>
+<li>
+<p>查快表（未命中）</p>
+</li>
+<li>
+<p>查慢表（发现未调入内存，缺页中断）</p>
+</li>
+<li>
+<p>调页（调入页会加入<strong>快、慢表</strong>）</p>
+</li>
+<li>
+<p><strong>查快表</strong>（命中）</p>
+</li>
+<li>
+<p>访问目标内存单元</p>
+<p><img src="https://i.loli.net/2020/07/02/8ZaMotEpzjbQlhG.png" alt="image-20200510151638932" /></p>
+</li>
 </ol>
 </li>
 </ul>
@@ -408,7 +420,7 @@
 <li><strong>页面调入内存后</strong>，先修改慢表，同时将页表项复制到快表中，<strong>即快慢表都修改</strong>，<strong>而后查快表</strong></li>
 </ul>
 <h3 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h3>
-<p><img src="https://i.loli.net/2020/07/02/8ZaMotEpzjbQlhG.png" alt="image-20200510151638932" /></p>
+<p><img src="https://i.loli.net/2020/07/02/Ht9dsLxuT8bqZcK.png" alt="image-20200511004910437" /></p>
 <h2 id="置换算法"><a class="markdownIt-Anchor" href="#置换算法"></a> 置换算法</h2>
 <h3 id="最佳置换"><a class="markdownIt-Anchor" href="#最佳置换"></a> 最佳置换</h3>
 <p>每次选择淘汰的页面将是<strong>以后永不使用或最长时间不再被访问</strong>的页面，以保证<strong>最低缺页率</strong></p>
@@ -695,9 +707,9 @@
 <blockquote>
 <p>分配 5 个内存块，页面引用串为 1，3，4，2，5，6，3，4，7</p>
 </blockquote>
+<img src="https://i.loli.net/2020/07/02/RePjfO3d28Jam6F.png" style="zoom: 52%;" />
 <img src="https://i.loli.net/2020/07/02/wAMJqnEVXb8gCur.png" alt="image-20200510231429920" style="zoom:50%;" />
 <img src="https://i.loli.net/2020/07/02/XgmFe3PiobRchOQ.png" alt="image-20200510231450974" style="zoom:50%;" />
-<img src="https://i.loli.net/2020/07/02/xUBZL1gWEnb5KD6.png" alt="image-20200510231518980" style="zoom:50%;" />
 <h3 id="改进clock"><a class="markdownIt-Anchor" href="#改进clock"></a> 改进CLOCK</h3>
 <ul>
 <li>只有被淘汰的页面同时<strong>被修改过</strong>，才需要<strong>写回外存</strong>，<strong>否则直接覆盖</strong><br />
@@ -891,7 +903,7 @@
 </li>
 <li>
 <p>操作系统根据“<strong>窗口尺寸</strong>”划定工作集，但工作集大小<strong>可能小于</strong>窗口尺寸</p>
-<p><img src="https://i.loli.net/2020/07/02/Ht9dsLxuT8bqZcK.png" alt="image-20200511004910437" /></p>
+  <img src="https://i.loli.net/2020/07/02/xUBZL1gWEnb5KD6.png" alt="image-20200510231518980" style="zoom:50%;" />
 </li>
 <li>
 <p>一般来说，<strong>驻留集不能小于工作集</strong>，否则换页频繁，效率降低</p>
@@ -919,12 +931,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%85%AB%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-8-实现临界区同步访问">
-      <i class="fa fa-chevron-left"></i> OS-8-实现临界区同步访问
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-13-内存">
+      <i class="fa fa-chevron-left"></i> OS-13-内存
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-22-I/O软件">
-      OS-22-I/O软件 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-19-文件空间分配和存储">
+      OS-19-文件空间分配和存储 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>

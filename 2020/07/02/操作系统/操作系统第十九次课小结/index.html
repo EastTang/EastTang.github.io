@@ -28,12 +28,12 @@
 <meta property="og:description" content="文件物理结构（连续&#x2F;链接&#x2F;索引分配）	存储空间管理（空闲表&#x2F;盘块链&#x2F;盘区链&#x2F;位示图）">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/yHqQwhvgSNJl1YL.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/NC6h9c1MbirAqGF.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/3QwKAH7gJ6SxqLr.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/hdAroG21UcWfkpq.png">
-<meta property="og:image" content="https://i.loli.net/2020/07/02/NC6h9c1MbirAqGF.png">
 <meta property="og:image" content="https://i.loli.net/2020/07/02/LubJlIaci4hOXUK.jpg">
 <meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-07-02T06:47:39.585Z">
+<meta property="article:modified_time" content="2020-07-02T07:18:29.529Z">
 <meta property="article:author" content="Tang">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
@@ -222,7 +222,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:39" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：15:18:29" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -763,7 +763,7 @@
 </li>
 <li>
 <p><strong>连续的空闲盘块组成一个空闲盘区</strong>，<strong>各区首个盘块</strong>记录盘区<strong>长度</strong>、指向下一盘区的<strong>指针</strong></p>
-<p><img src="https://i.loli.net/2020/07/02/3QwKAH7gJ6SxqLr.png" alt="image-20200524172412194" /></p>
+<p><img src="https://i.loli.net/2020/07/02/NC6h9c1MbirAqGF.png" alt="image-20200524190254805" /></p>
 </li>
 <li>
 <p><strong>如何分配</strong></p>
@@ -787,7 +787,7 @@
 <ul>
 <li>
 <p><strong>位示图</strong>：<strong>每个二进制位对应一个盘块</strong>，0/1 表示分配状态，也使用（<strong>字号</strong>，<strong>位号</strong>）一一对应</p>
-<p><img src="https://i.loli.net/2020/07/02/hdAroG21UcWfkpq.png" alt="image-20200524180845775" /></p>
+<p><img src="https://i.loli.net/2020/07/02/3QwKAH7gJ6SxqLr.png" alt="image-20200524172412194" /></p>
 <table>
 <thead>
 <tr>
@@ -867,7 +867,7 @@
 <li>
 <p><strong>每层首个磁盘块的首条记录项</strong>记录<strong>本层的空闲盘块总数</strong>，后续所有记录项记录<strong>本层</strong>空闲块的<strong>物理块号</strong>，则后续的第一条（总的第二条）对应的磁盘块是<strong>下层的目录</strong><br />
 若没有下层空闲块则总的第二条记录值记为 -1</p>
-<p><img src="https://i.loli.net/2020/07/02/NC6h9c1MbirAqGF.png" alt="image-20200524190254805" /></p>
+<p><img src="https://i.loli.net/2020/07/02/hdAroG21UcWfkpq.png" alt="image-20200524180845775" /></p>
 </li>
 <li>
 <p><strong>如何分配</strong><br />
@@ -905,12 +905,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-14-内存分配方式与算法">
-      <i class="fa fa-chevron-left"></i> OS-14-内存分配方式与算法
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%83%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-17-请求分页 页面置换与分配">
+      <i class="fa fa-chevron-left"></i> OS-17-请求分页 页面置换与分配
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-15-分页存储管理">
-      OS-15-分页存储管理 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%80%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-11-管程与死锁">
+      OS-11-管程与死锁 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
