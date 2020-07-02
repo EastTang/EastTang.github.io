@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="文件物理结构（连续&#x2F;链接&#x2F;索引分配）	存储空间管理（空闲表&#x2F;盘块链&#x2F;盘区链&#x2F;位示图）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-19-文件空间分配和存储">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="文件物理结构（连续&#x2F;链接&#x2F;索引分配）	存储空间管理（空闲表&#x2F;盘块链&#x2F;盘区链&#x2F;位示图）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/yHqQwhvgSNJl1YL.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/3QwKAH7gJ6SxqLr.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/hdAroG21UcWfkpq.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/NC6h9c1MbirAqGF.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/LubJlIaci4hOXUK.jpg">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:47:39.585Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/07/02/yHqQwhvgSNJl1YL.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-19-文件空间分配和存储 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-19-文件空间分配和存储
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:39" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+            <div class="post-description">文件物理结构（连续/链接/索引分配）	存储空间管理（空闲表/盘块链/盘区链/位示图）</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#%E6%96%87%E4%BB%B6%E7%89%A9%E7%90%86%E7%BB%93%E6%9E%84">文件物理结构</a>
+<ul>
+<li><a href="#%E6%A6%82%E5%BF%B5">概念</a></li>
+<li><a href="#%E8%BF%9E%E7%BB%AD%E5%88%86%E9%85%8D">连续分配</a></li>
+<li><a href="#%E9%93%BE%E6%8E%A5%E5%88%86%E9%85%8D">链接分配</a>
+<ul>
+<li><a href="#%E9%9A%90%E5%BC%8F%E9%93%BE%E6%8E%A5">隐式链接</a></li>
+<li><a href="#%E6%98%BE%E5%BC%8F%E9%93%BE%E6%8E%A5">显式链接</a></li>
+</ul>
+</li>
+<li><a href="#%E7%B4%A2%E5%BC%95%E5%88%86%E9%85%8D">索引分配</a>
+<ul>
+<li><a href="#%E9%93%BE%E6%8E%A5%E6%96%B9%E6%A1%88">链接方案</a></li>
+<li><a href="#%E5%A4%9A%E5%B1%82%E7%B4%A2%E5%BC%95">多层索引</a></li>
+<li><a href="#%E6%B7%B7%E5%90%88%E7%B4%A2%E5%BC%95">混合索引</a></li>
+<li><a href="#%E9%87%8D%E7%82%B9%E8%A6%81%E6%B1%82">重点要求</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86">文件存储空间管理</a>
+<ul>
+<li><a href="#%E6%A6%82%E5%BF%B5-2">概念</a></li>
+<li><a href="#%E7%A9%BA%E9%97%B2%E8%A1%A8%E6%B3%95">空闲表法</a></li>
+<li><a href="#%E7%A9%BA%E9%97%B2%E7%9B%98%E5%9D%97%E9%93%BE">空闲盘块链</a></li>
+<li><a href="#%E7%A9%BA%E9%97%B2%E7%9B%98%E5%8C%BA%E9%93%BE">空闲盘区链</a></li>
+<li><a href="#%E4%BD%8D%E7%A4%BA%E5%9B%BE%E6%B3%95">位示图法</a></li>
+<li><a href="#%E6%88%90%E7%BB%84%E9%93%BE%E6%8E%A5%E6%B3%95">成组链接法</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-2">小结</a></li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="操作系统第十九次课小结"><a class="markdownIt-Anchor" href="#操作系统第十九次课小结"></a> 操作系统第十九次课小结</h1>
+<h2 id="文件物理结构"><a class="markdownIt-Anchor" href="#文件物理结构"></a> 文件物理结构</h2>
+<h3 id="概念"><a class="markdownIt-Anchor" href="#概念"></a> 概念</h3>
+<ul>
+<li>
+<p><strong>磁盘块</strong>：磁盘中的存储单元拆分成块，<strong>大小与内存块、页面相同</strong></p>
+<ul>
+<li>内存与磁盘的数据交换（读/写操作、磁盘I/O）都是以<strong>块</strong>为单位</li>
+</ul>
+</li>
+<li>
+<p><strong>文件块</strong>：外存管理中，<strong>文件的逻辑地址空间</strong>也被分为若干个<strong>块</strong></p>
+<ul>
+<li>操作系统<strong>为文件分配存储空间</strong>也是以<strong>块</strong>为单位</li>
+<li>逻辑地址按（<strong>逻辑块号</strong>，<strong>块内地址</strong>）的形式表示</li>
+<li>用户通过逻辑地址操作文件，<strong>操作系统实现从逻辑地址到物理地址的映射</strong></li>
+</ul>
+<blockquote>
+<p>若块的大小为 1 KB，则 1 MB 大小的文件可被分为 1 K 个块</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="连续分配"><a class="markdownIt-Anchor" href="#连续分配"></a> 连续分配</h3>
+<ul>
+<li>
+<p>要求<strong>每个文件在磁盘上占有一组连续的块</strong></p>
+</li>
+<li>
+<p>目录文件（FCB）中记录存放的<strong>起始块号</strong>和<strong>占有长度</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">文件名</th>
+<th style="text-align:center">···</th>
+<th style="text-align:center">起始块号</th>
+<th style="text-align:center">长度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">A</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">3</td>
+</tr>
+<tr>
+<td style="text-align:center">B</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">4</td>
+</tr>
+<tr>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>转换过程</strong>：（逻辑块号，块内地址）→（物理块号，块内地址），<strong>只</strong>转换块号即可，块内地址不改变</p>
+<ol>
+<li>用户给出要访问的<strong>逻辑块号</strong></li>
+<li>操作系统找到相应 <strong>FCB</strong>，获取文件的<strong>起始地址</strong>和<strong>占有长度</strong></li>
+<li>判断逻辑块号<strong>是否合法</strong> （<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">逻</mi><mi mathvariant="normal">辑</mi><mi mathvariant="normal">块</mi><mi mathvariant="normal">号</mi><mo>≥</mo><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><annotation encoding="application/x-tex">逻辑块号 \ge 长度</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719400000000001em;vertical-align:-0.13597em;"></span><span class="mord cjk_fallback">逻</span><span class="mord cjk_fallback">辑</span><span class="mord cjk_fallback">块</span><span class="mord cjk_fallback">号</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span> <strong>即不合法</strong>）</li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">物</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">块</mi><mi mathvariant="normal">号</mi><mo>=</mo><mi mathvariant="normal">起</mi><mi mathvariant="normal">始</mi><mi mathvariant="normal">块</mi><mi mathvariant="normal">号</mi><mo>+</mo><mi mathvariant="normal">逻</mi><mi mathvariant="normal">辑</mi><mi mathvariant="normal">块</mi><mi mathvariant="normal">号</mi></mrow><annotation encoding="application/x-tex">物理块号 = 起始块号+逻辑块号</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">物</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">块</span><span class="mord cjk_fallback">号</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">起</span><span class="mord cjk_fallback">始</span><span class="mord cjk_fallback">块</span><span class="mord cjk_fallback">号</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">逻</span><span class="mord cjk_fallback">辑</span><span class="mord cjk_fallback">块</span><span class="mord cjk_fallback">号</span></span></span></span>，得到物理块号将其读入内存</li>
+</ol>
+</li>
+<li>
+<p>给出逻辑地址课直接在内存中算出对应的物理块号，因此<strong>连续分配支持顺序访问和直接访问</strong>（随机存取）</p>
+</li>
+<li>
+<p><strong>优点</strong>：执行顺序访问和直接访问；连续分配的文件在<strong>顺序访问时速度最快</strong><br />
+<strong>缺点</strong>：<strong>不方便文件拓展</strong>；<strong>存储空间利用率低</strong>，<strong>会产生磁盘碎片</strong></p>
+</li>
+</ul>
+<h3 id="链接分配"><a class="markdownIt-Anchor" href="#链接分配"></a> 链接分配</h3>
+<h4 id="隐式链接"><a class="markdownIt-Anchor" href="#隐式链接"></a> 隐式链接</h4>
+<ul>
+<li>
+<p>除文件的<strong>最后一个磁盘块外</strong>，<strong>每个磁盘块中会保存指向下一块的指针</strong>，此内容<strong>用户不可见</strong></p>
+</li>
+<li>
+<p>目录文件中（FCB）记录了<strong>起始块号</strong>和<strong>结束块号</strong>，按需增加文件<strong>长度</strong>字段</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">文件名</th>
+<th style="text-align:center">···</th>
+<th style="text-align:center">起始块号</th>
+<th style="text-align:center">结束块号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">A</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">8</td>
+</tr>
+<tr>
+<td style="text-align:center">B</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">16</td>
+</tr>
+<tr>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>转换过程</strong></p>
+<ol>
+<li>用户给出<strong>逻辑块号</strong> i，操作系统找到相应的目录项（<strong>FCB</strong>）</li>
+<li>得出<strong>起始块号</strong>，并将该块读入内存</li>
+<li>按遍历链表查找，<strong>从当前块取得下一块的块号</strong>并将其<strong>调入内存</strong></li>
+<li>直到当前的物理块是链表的第 <strong>i</strong> 块 （块号 i <strong>从零开始</strong>计数）</li>
+<li>期间磁盘I/O需 <strong>i+1</strong> 次 (第 0 块实际上是已调入了 1 次)</li>
+</ol>
+</li>
+<li>
+<p><strong>只支持顺序访问</strong>，<strong>不支持随机访问</strong><br />
+增删效率高，<strong>查找效率低</strong><br />
+指向下一盘块的指针需要少量存储空间</p>
+</li>
+</ul>
+<h4 id="显式链接"><a class="markdownIt-Anchor" href="#显式链接"></a> 显式链接</h4>
+<ul>
+<li><strong>文件分配表</strong>（FAT）：把用于链接文件各物理块的的指针<strong>显示地存放</strong>在一张表中</li>
+<li>FCB 中只需记录文件的<strong>起始块号</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">文件名</th>
+<th style="text-align:center">···</th>
+<th style="text-align:center">起始块号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">A</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">4</td>
+</tr>
+<tr>
+<td style="text-align:center">B</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">10</td>
+</tr>
+<tr>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>假设新建某文件，存放磁盘块为 2 → 5 → 0 → 1，<strong>末块的下一块标记</strong>应为 -1</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">物理块号</th>
+<th style="text-align:center">下一张</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">-1</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">5</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">-1</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">23</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>一个磁盘仅设置一张 FAT，开机时一次性读入内存，并常驻</strong></li>
+<li>FAT物理上连续存储，表项长度相等，因此<strong>块号可隐含</strong></li>
+<li><strong>访问流程</strong>：
+<ol>
+<li>用户给出要访问的块号 i，操作系统找到该文件对应的 FCB</li>
+<li>从 FCB <strong>找到起始块号</strong>，若 i &gt; 0 (<strong>为0则目标块即为起始块</strong>)，查询 FAT 往后找到 i 号逻辑块对应的物理块，<strong>其中逻辑块号转物理块号的过程无需磁盘操作</strong>（均在内存进行）</li>
+</ol>
+</li>
+<li>支持顺序访问，<strong>也支持随机访问</strong>（访问某块无需从磁盘读取前几块，在内存中直接计算推演）</li>
+<li><strong>不会产生外部碎片</strong>，<strong>也方便拓展文件</strong></li>
+</ul>
+<h3 id="索引分配"><a class="markdownIt-Anchor" href="#索引分配"></a> 索引分配</h3>
+<ul>
+<li>允许文件<strong>离散存放到磁盘块</strong>中，为<strong>每个文件建立一张索引表</strong>，记录文件各<strong>逻辑块对应的物理块号</strong></li>
+<li>索引表项一一映射，连续存放，<strong>逻辑块号隐含</strong></li>
+<li>索引表存放的磁盘块称为<strong>索引块</strong>，文件数据存放的磁盘称为<strong>数据块</strong></li>
+<li>FCB中<strong>只需记录索引块的块号</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">文件名</th>
+<th style="text-align:center">······</th>
+<th style="text-align:center">索引块</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">A</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">7</td>
+</tr>
+<tr>
+<td style="text-align:center">B</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">23</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>显式链接一个磁盘对应一张FAT，（单级）<strong>索引分配一个文件对应一张索引表</strong></p>
+</li>
+<li>
+<p>可用固定的表项长度存放物理块号</p>
+<blockquote>
+<p>假设磁盘总容量为 1 TB = 2<sup>40</sup> B，磁盘块大小为 1 KB，则共有 2<sup>30</sup> 个磁盘块，则可用 4 B 表示磁盘块号（块号最大值2<sup>30</sup> &lt; 4 B = 2<sup>32</sup>）</p>
+</blockquote>
+</li>
+<li>
+<p><strong>访问流程</strong></p>
+<ol>
+<li>用户给出要访问的块号 i，操作系统找到该文件对应的 FCB</li>
+<li>从 FCB 中取得索引表存放位置，<strong>将索引表从外存调入内存</strong></li>
+<li>查找索引表中第 i 项对应的物理块号即为文件外存存放地址</li>
+</ol>
+</li>
+<li>
+<p><strong>支持随机访问</strong>，<strong>易实现文件拓展</strong>（只需新分配一个空闲块，添加一个索引表项）</p>
+</li>
+<li>
+<p><strong>索引表占用一定存储空间</strong></p>
+</li>
+</ul>
+<blockquote>
+<p>若每个磁盘块 1 KB，一个索引项 4 B，则一个磁盘块最多只能存放 256 个索引项，因此当文件过大时，一个索引块无法完整表示</p>
+</blockquote>
+<h4 id="链接方案"><a class="markdownIt-Anchor" href="#链接方案"></a> 链接方案</h4>
+<ul>
+<li><strong>多个索引块链接</strong></li>
+<li>FCB 只需记录<strong>首个索引块</strong>的存放位置</li>
+</ul>
+<blockquote>
+<p>若设备配置如上述，一文件大小为 256*256 KB = 64 MB，则文件共 256<sup>2</sup> 块，因此需要 256 个索引表链接起来存储</p>
+<p>若访问第 256 块，则需遍历前 255 块</p>
+</blockquote>
+<h4 id="多层索引"><a class="markdownIt-Anchor" href="#多层索引"></a> 多层索引</h4>
+<ul>
+<li>原理类似于多级页表，<strong>第一层索引块指向第二层索引块</strong>，同理类推，<strong>最后一层指向文件</strong></li>
+<li><strong>各层索引表大小不得超过一个磁盘块</strong></li>
+<li><strong>根据逻辑块号可算其索引表项位置</strong></li>
+<li>采用 <strong>k</strong> 层索引，且顶层索引<strong>未调入内存</strong>，则单次访问需 <strong>k+1</strong> 次读磁盘操作</li>
+</ul>
+<blockquote>
+<p>同上述，采用两层索引，则最大长度为 （一级索引表项数）256 * （二级索引表项数）256 * （单文件大小）1 KB = 64 MB</p>
+<p><strong>若访问 1026 号逻辑块，1026/256=4，1026%256=2，</strong></p>
+<p>则其记录位于 一级索引表第 4 项对应的二级索引表的第 2 项</p>
+<p>共需 3 次磁盘IO</p>
+</blockquote>
+<h4 id="混合索引"><a class="markdownIt-Anchor" href="#混合索引"></a> 混合索引</h4>
+<ul>
+<li>
+<p><strong>多种索引分配方式的结合</strong>，顶级索引表包含<strong>直接地址索引</strong>（直接指向<strong>数据块</strong>），<strong>一级间接索引</strong>（指向<strong>单层</strong>索引表），<strong>二级间接索引</strong>（指向<strong>两层</strong>索引表）</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">顶级索引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">直接地址</td>
+</tr>
+<tr>
+<td style="text-align:center">······（多个直接地址）</td>
+</tr>
+<tr>
+<td style="text-align:center">一级间接</td>
+</tr>
+<tr>
+<td style="text-align:center">二级间接</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>对小文件只需较少的磁盘操作次数</strong></p>
+<blockquote>
+<p>若顶级索引表未读入内存，直接地址 8 个，一级间接 1 个，区其余为二级间接，则</p>
+<p>访问 0~7 号逻辑块：<strong>两次</strong></p>
+<p>访问 8~256 号逻辑块：<strong>三次</strong></p>
+<p>访问 else ：<strong>四次</strong></p>
+</blockquote>
+</li>
+</ul>
+<h4 id="重点要求"><a class="markdownIt-Anchor" href="#重点要求"></a> 重点要求</h4>
+<ul>
+<li>能根据<strong>多层索引</strong>、<strong>混合索引</strong>的结构计算文件的<strong>最大长度</strong><br />
+（<strong>Key</strong>：各级索引表不超过一个块）</li>
+<li>能分析访问某个数据块的<strong>读磁盘次数</strong><br />
+(<strong>Key</strong>：每级索引表需一次，读文件需一次，<strong>注意顶级索引表是否在内存</strong>)</li>
+</ul>
+<h3 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">方式</th>
+<th style="text-align:center">思想</th>
+<th style="text-align:center">目录项内容</th>
+<th style="text-align:center">优点</th>
+<th style="text-align:center">缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">顺序分配</td>
+<td style="text-align:center">为文件分配<strong>连续</strong>的磁盘块</td>
+<td style="text-align:center">起始块号、文件长度</td>
+<td style="text-align:center">存取快<br />支持随机访问</td>
+<td style="text-align:center">会产生碎片<br />不利于文件拓展</td>
+</tr>
+<tr>
+<td style="text-align:center">隐式链接</td>
+<td style="text-align:center">除最后一个盘块，其余<strong>存有指向下一块的指针</strong></td>
+<td style="text-align:center">起始块号、结束块号</td>
+<td style="text-align:center">解决碎片问题，提高外存利用率<br />易实现文件拓展</td>
+<td style="text-align:center">只能顺序访问，不能随机访问</td>
+</tr>
+<tr>
+<td style="text-align:center">显式链接</td>
+<td style="text-align:center"><strong>各磁盘建立一张文件分配表</strong>（FAT），显示记录盘块先后关系<br />常驻内存</td>
+<td style="text-align:center">起始块号</td>
+<td style="text-align:center">同上，且通过查内存中的 FAT 实现随机访问</td>
+<td style="text-align:center">FAT 需占用一定的存储空间</td>
+</tr>
+<tr>
+<td style="text-align:center">索引分配</td>
+<td style="text-align:center"><strong>各文件建立索引表</strong>，若文件过大，采用链接索引、多层索引、混合索引</td>
+<td style="text-align:center">记录顶级索引表所在块号</td>
+<td style="text-align:center">支持随机访问<br />易实现文件拓展</td>
+<td style="text-align:center">索引表占用一定空间<br />读取索引块需磁盘I/O</td>
+</tr>
+</tbody>
+</table>
+<h2 id="文件存储空间管理"><a class="markdownIt-Anchor" href="#文件存储空间管理"></a> 文件存储空间管理</h2>
+<h3 id="概念-2"><a class="markdownIt-Anchor" href="#概念-2"></a> 概念</h3>
+<ul>
+<li><strong>存储空间划分</strong>：将物理磁盘划分为若干<strong>文件卷</strong>（逻辑卷、逻辑盘）</li>
+<li><strong>存储空间初始化</strong>：各文件卷划分为目录区和文件区
+<ul>
+<li>目录区存放 FCB、磁盘存储空间管理信息</li>
+<li>文件区用于存放文件数据</li>
+</ul>
+</li>
+<li>大文件系统支持多个物理磁盘合并为一个文件卷</li>
+</ul>
+<h3 id="空闲表法"><a class="markdownIt-Anchor" href="#空闲表法"></a> 空闲表法</h3>
+<ul>
+<li>
+<p>记录的是<strong>连续的空闲块</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">起始块号</th>
+<th style="text-align:center">连续块数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">2</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:center">13</td>
+<td style="text-align:center">8</td>
+</tr>
+<tr>
+<td style="text-align:center">23</td>
+<td style="text-align:center">1</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>为一个文件<strong>分配连续的存储空间</strong>，同样可采用<strong>首次适应</strong>、<strong>最佳适应</strong>、<strong>最坏适应</strong>决定分配哪个区间</p>
+</li>
+<li>
+<p>回收磁盘块需分情况讨论<strong>合并问题</strong></p>
+<ol>
+<li>回收区前后无空闲块</li>
+<li>回收区前后均空闲块</li>
+<li>回收区前是空闲块</li>
+<li>回收区后是空闲块</li>
+</ol>
+</li>
+</ul>
+<h3 id="空闲盘块链"><a class="markdownIt-Anchor" href="#空闲盘块链"></a> 空闲盘块链</h3>
+<ul>
+<li>
+<p>操作系统记录<strong>链头</strong>和<strong>链尾指针</strong>，<strong>空闲盘块中存放指向下一空闲块的指针</strong></p>
+<p><img src="https://i.loli.net/2020/07/02/yHqQwhvgSNJl1YL.png" alt="image-20200524170855129" /></p>
+</li>
+<li>
+<p><strong>如何分配</strong>：若某文件申请 k 个盘块，则<strong>从链头开始</strong>依次摘下 k 个盘块分配，并<strong>修改空闲链的链头指针</strong></p>
+</li>
+<li>
+<p><strong>如何回收</strong>：回收的盘块依次<strong>挂到链尾</strong>，并<strong>修改空闲链的链尾指针</strong></p>
+</li>
+<li>
+<p><strong>适用于离散分配</strong>的物理结构，为文件分配<strong>多个</strong>盘块时需<strong>重复多次操作</strong></p>
+</li>
+</ul>
+<h3 id="空闲盘区链"><a class="markdownIt-Anchor" href="#空闲盘区链"></a> 空闲盘区链</h3>
+<ul>
+<li>
+<p>操作系统<strong>记录链头</strong>、<strong>链尾指针</strong></p>
+</li>
+<li>
+<p><strong>连续的空闲盘块组成一个空闲盘区</strong>，<strong>各区首个盘块</strong>记录盘区<strong>长度</strong>、指向下一盘区的<strong>指针</strong></p>
+<p><img src="https://i.loli.net/2020/07/02/3QwKAH7gJ6SxqLr.png" alt="image-20200524172412194" /></p>
+</li>
+<li>
+<p><strong>如何分配</strong></p>
+<ul>
+<li>若文件申请 k 个盘块，采用适当的分配选择算法，<strong>从链头开始检索</strong>，<strong>按算法规则找到一个符合大小要求的盘区</strong>，分配给文件</li>
+<li><strong>若无合适盘区</strong>，<strong>可将不同盘区同时分配给一个文件</strong>，注意分配后修改相应的链指针、盘区大小等数据</li>
+</ul>
+</li>
+<li>
+<p><strong>如何回收</strong></p>
+<ul>
+<li>若空闲区和某个空闲盘区<strong>相邻</strong>，则需将回收区<strong>合并</strong>到空闲盘区中</li>
+<li><strong>若没有和任何空闲区相邻</strong>，<strong>则作为单独分区挂到链尾</strong></li>
+</ul>
+</li>
+<li>
+<p>离散分配、连续分配<strong>均适用</strong>，<strong>为单文件分配多盘块时效率更高</strong></p>
+</li>
+</ul>
+<h3 id="位示图法"><a class="markdownIt-Anchor" href="#位示图法"></a> 位示图法</h3>
+<ul>
+<li>
+<p><strong>位示图</strong>：<strong>每个二进制位对应一个盘块</strong>，0/1 表示分配状态，也使用（<strong>字号</strong>，<strong>位号</strong>）一一对应</p>
+<p><img src="https://i.loli.net/2020/07/02/hdAroG21UcWfkpq.png" alt="image-20200524180845775" /></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow></mrow><mrow><mi mathvariant="normal">字</mi><mi mathvariant="normal">号</mi></mrow></msub><msup><mtext> </mtext><mrow><mi mathvariant="normal">位</mi><mi mathvariant="normal">号</mi></mrow></msup></mrow><annotation encoding="application/x-tex">_{字号}\ ^{位号}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.513em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:-0.15em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">字</span><span class="mord cjk_fallback mtight">号</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mspace"> </span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.363em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">位</span><span class="mord cjk_fallback mtight">号</span></span></span></span></span></span></span></span></span></span></span></span></th>
+<th style="text-align:center">0</th>
+<th style="text-align:center">1</th>
+<th style="text-align:center">2</th>
+<th style="text-align:center">3</th>
+<th style="text-align:center">4</th>
+<th style="text-align:center">5</th>
+<th style="text-align:center">6</th>
+<th style="text-align:center">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>0</strong></td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>要求能自行推出<strong>盘块号与（字号，位号）相互转换的公式</strong><br />
+<strong>注意题干条件</strong>：盘块号、字号、位号是从 <strong>0</strong> 开始还是从 <strong>1</strong> 开始</p>
+</li>
+<li>
+<p>设均从 <strong>0</strong> 开始且字长为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span>，则<br />
+（字号，位号）=<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">（</mi><mi>i</mi><mi mathvariant="normal">，</mi><mi>j</mi><mi mathvariant="normal">）</mi></mrow><annotation encoding="application/x-tex">（i，j）</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.85396em;vertical-align:-0.19444em;"></span><span class="mord cjk_fallback">（</span><span class="mord mathdefault">i</span><span class="mord cjk_fallback">，</span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mord cjk_fallback">）</span></span></span></span><strong>对应的盘块号为</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mo>=</mo><mi>n</mi><mi>i</mi><mo>+</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">b = ni + j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.74285em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">n</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.85396em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span></span></span></span><br />
+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">b</span></span></span></span> 号盘块对应的<strong>字号</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi><mo>=</mo><mi>b</mi><mi mathvariant="normal">/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">i=b/n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">n</span></span></span></span>，<strong>位号</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi><mo>=</mo><mi>b</mi><mi mathvariant="normal">%</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">j=b\%n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.85396em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.80556em;vertical-align:-0.05556em;"></span><span class="mord mathdefault">b</span><span class="mord">%</span><span class="mord mathdefault">n</span></span></span></span></p>
+</li>
+<li>
+<p><strong>如何分配</strong></p>
+<ol>
+<li>若文件需要 K 个块，顺序扫描位示图，找到 K 个相邻或不相邻的 “0”</li>
+<li>根据其字号、位号算出对应的盘块号，将相应盘块分配给文件</li>
+<li>将对应位修改为 “1”</li>
+</ol>
+</li>
+<li>
+<p><strong>如何回收</strong></p>
+<ol>
+<li>根据回收的盘块号计算相应的字号、位号</li>
+<li>将位示图中相应位置修改为 “0”</li>
+</ol>
+</li>
+<li>
+<p>连续分配、离散分配<strong>均适用</strong></p>
+</li>
+</ul>
+<h3 id="成组链接法"><a class="markdownIt-Anchor" href="#成组链接法"></a> 成组链接法</h3>
+<ul>
+<li>
+<p>为适应<strong>大型文件系统</strong>（空闲表或链表可能过长），UNIX 系统采用<strong>成组链接法</strong>管理空闲块</p>
+</li>
+<li>
+<p><strong>文件卷的目录区</strong>设置一个磁盘块为<strong>超级块</strong>，系统启动时读入内存，并<strong>保证</strong>内存与外存中的超级块<strong>数据一致</strong></p>
+</li>
+<li>
+<p><strong>每层首个磁盘块的首条记录项</strong>记录<strong>本层的空闲盘块总数</strong>，后续所有记录项记录<strong>本层</strong>空闲块的<strong>物理块号</strong>，则后续的第一条（总的第二条）对应的磁盘块是<strong>下层的目录</strong><br />
+若没有下层空闲块则总的第二条记录值记为 -1</p>
+<p><img src="https://i.loli.net/2020/07/02/NC6h9c1MbirAqGF.png" alt="image-20200524190254805" /></p>
+</li>
+<li>
+<p><strong>如何分配</strong><br />
+假设需要 100 个空闲块</p>
+<ol>
+<li>检查超级块当前分组的块数是否足够</li>
+<li>100=100，足够则分配，但是由于300号块存放了下一组的信息，<strong>因此复制300号的目录信息到超级块中</strong></li>
+<li><strong>目录转移后分配该组给文件</strong>，<strong>新的目录信息作为当前组</strong></li>
+<li>上接第二步，不足则查找下一组</li>
+</ol>
+</li>
+<li>
+<p><strong>如何回收</strong><br />
+假设每个分组最多 100 个空闲块，此时当前组已满，还要再回收 1 块<br />
+<strong>需将超级块中的数据复制到新回收的块中，并修改超级块的内容，让新回收的块成为当前组</strong></p>
+</li>
+</ul>
+<h3 id="小结-2"><a class="markdownIt-Anchor" href="#小结-2"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/LubJlIaci4hOXUK.jpg" alt="文件存储空间管理07小结" /></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-14-内存分配方式与算法">
+      <i class="fa fa-chevron-left"></i> OS-14-内存分配方式与算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-15-分页存储管理">
+      OS-15-分页存储管理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第十九次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第十九次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#文件物理结构"><span class="nav-number">1.1.</span> <span class="nav-text"> 文件物理结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念"><span class="nav-number">1.1.1.</span> <span class="nav-text"> 概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连续分配"><span class="nav-number">1.1.2.</span> <span class="nav-text"> 连续分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链接分配"><span class="nav-number">1.1.3.</span> <span class="nav-text"> 链接分配</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#隐式链接"><span class="nav-number">1.1.3.1.</span> <span class="nav-text"> 隐式链接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#显式链接"><span class="nav-number">1.1.3.2.</span> <span class="nav-text"> 显式链接</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引分配"><span class="nav-number">1.1.4.</span> <span class="nav-text"> 索引分配</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#链接方案"><span class="nav-number">1.1.4.1.</span> <span class="nav-text"> 链接方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多层索引"><span class="nav-number">1.1.4.2.</span> <span class="nav-text"> 多层索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#混合索引"><span class="nav-number">1.1.4.3.</span> <span class="nav-text"> 混合索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重点要求"><span class="nav-number">1.1.4.4.</span> <span class="nav-text"> 重点要求</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.1.5.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件存储空间管理"><span class="nav-number">1.2.</span> <span class="nav-text"> 文件存储空间管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念-2"><span class="nav-number">1.2.1.</span> <span class="nav-text"> 概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#空闲表法"><span class="nav-number">1.2.2.</span> <span class="nav-text"> 空闲表法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#空闲盘块链"><span class="nav-number">1.2.3.</span> <span class="nav-text"> 空闲盘块链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#空闲盘区链"><span class="nav-number">1.2.4.</span> <span class="nav-text"> 空闲盘区链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#位示图法"><span class="nav-number">1.2.5.</span> <span class="nav-text"> 位示图法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#成组链接法"><span class="nav-number">1.2.6.</span> <span class="nav-text"> 成组链接法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">1.2.7.</span> <span class="nav-text"> 小结</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

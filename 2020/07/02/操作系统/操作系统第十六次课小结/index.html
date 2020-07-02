@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="分段与段页式概念及其地址变换机制	虚拟内存的概念与特征">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-16-分段、段页式内存管理 以及 虚拟内存技术">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="分段与段页式概念及其地址变换机制	虚拟内存的概念与特征">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/VKwzZujdb38EWDk.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/dMYgPKIDZ41JTma.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/Coxim5PGZw9gM2V.png">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:47:26.432Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/07/02/VKwzZujdb38EWDk.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-16-分段、段页式内存管理 以及 虚拟内存技术 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-16-分段、段页式内存管理 以及 虚拟内存技术
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:26" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">分段与段页式概念及其地址变换机制	虚拟内存的概念与特征</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%86%E6%AE%B5">分段</a>
+<ul>
+<li><a href="#%E6%A6%82%E5%BF%B5">概念</a></li>
+<li><a href="#%E5%9C%B0%E5%9D%80%E7%BB%93%E6%9E%84">地址结构</a></li>
+<li><a href="#%E6%AE%B5%E8%A1%A8">段表</a></li>
+<li><a href="#%E5%9C%B0%E5%9D%80%E5%8F%98%E6%8D%A2%E6%9C%BA%E5%88%B6">地址变换机制</a></li>
+<li><a href="#%E5%88%86%E9%A1%B5%E5%88%86%E6%AE%B5%E5%AF%B9%E6%AF%94">分页分段对比</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E6%AE%B5%E9%A1%B5%E5%BC%8F">段页式</a>
+<ul>
+<li><a href="#%E5%88%86%E6%AE%B5%E5%88%86%E9%A1%B5%E4%BC%98%E7%BC%BA%E7%82%B9%E5%88%86%E6%9E%90">分段分页优缺点分析</a></li>
+<li><a href="#%E7%AE%A1%E7%90%86%E6%B5%81%E7%A8%8B">管理流程</a></li>
+<li><a href="#%E5%9C%B0%E5%9D%80%E7%BB%93%E6%9E%84-2">地址结构</a></li>
+<li><a href="#%E6%AE%B5%E8%A1%A8%E4%B8%8E%E9%A1%B5%E8%A1%A8">段表与页表</a></li>
+<li><a href="#%E5%9C%B0%E5%9D%80%E5%8F%98%E6%8D%A2%E6%9C%BA%E5%88%B6-2">地址变换机制</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-2">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E8%99%9A%E6%8B%9F%E6%8A%80%E6%9C%AF">虚拟技术</a>
+<ul>
+<li><a href="#%E8%83%8C%E6%99%AF">背景</a></li>
+<li><a href="#%E5%AE%9A%E4%B9%89%E5%92%8C%E7%89%B9%E5%BE%81">定义和特征</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0">实现</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-3">小结</a></li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="操作系统第十六次课小结"><a class="markdownIt-Anchor" href="#操作系统第十六次课小结"></a> 操作系统第十六次课小结</h1>
+<h2 id="分段"><a class="markdownIt-Anchor" href="#分段"></a> 分段</h2>
+<h3 id="概念"><a class="markdownIt-Anchor" href="#概念"></a> 概念</h3>
+<ul>
+<li>按照程序自身<strong>逻辑</strong>（主函数、子函数、全局变量等），划分若干段，每段从 <strong>0</strong> 开始编址</li>
+<li>内存分配规则：以段为单位，<strong>每段</strong>在内存中占<strong>连续</strong>空间，<strong>段之间可不连续</strong></li>
+<li><strong>编程方便，可读性高</strong></li>
+</ul>
+<h3 id="地址结构"><a class="markdownIt-Anchor" href="#地址结构"></a> 地址结构</h3>
+<ul>
+<li>
+<p>分为段号和段内地址偏移量</p>
+</li>
+<li>
+<p>段号位数决定了每个进程最多可分几段<br />
+段内地址数决定了每段的最大长度</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">段号</th>
+<th style="text-align:center">段内地址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">31 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>⋯</mo><mo>⋯</mo></mrow><annotation encoding="application/x-tex">\cdots \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.31em;vertical-align:0em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span> 16</td>
+<td style="text-align:center">15 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>⋯</mo><mo>⋯</mo></mrow><annotation encoding="application/x-tex">\cdots \cdots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.31em;vertical-align:0em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span></span></span></span> 0</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>段号占16位，每个进程最多有 2<sup>16</sup> = 64k 个段</p>
+<p>段内地址占16位，每段的最大长度为 2<sup>16</sup> = 64k</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="段表"><a class="markdownIt-Anchor" href="#段表"></a> 段表</h3>
+<ul>
+<li>
+<p>记录进程拆分而成的各个段的存放位置</p>
+</li>
+<li>
+<p>每个段对应一个段表项，记录了<strong>起始位置</strong>（基址）和<strong>段长</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">段号（隐含）</th>
+<th style="text-align:center">段长</th>
+<th style="text-align:center">基址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">7K</td>
+<td style="text-align:center">80K</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">3K</td>
+<td style="text-align:center">120K</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">6K</td>
+<td style="text-align:center">40K</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>段表项长度<strong>相等</strong>；<strong>段长</strong>的最大位数等于<strong>段内地址</strong>位数，<strong>基址</strong>的最大位数等于<strong>系统内存</strong>位数；段号是隐含的，可推导</p>
+<blockquote>
+<p>某系统按字节寻址，分段存储管理，逻辑地址为（段号16位，段内地址16位），物理内存大小 4GB。</p>
+<p>段内地址16位 ⟶ 最大段长 = 2<sup>16</sup> ⟶ 段长占16位</p>
+<p>物理内存4GB ⟶ 地址空间 = 2<sup>32</sup> ⟶ 基址占32位</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo></mrow><annotation encoding="application/x-tex">\therefore</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span></span></span></span> 段表项占 16 + 32 = 48 位，大小为 6B</p>
+<p>若段表存放的起始地址为 M</p>
+<p>则 k 号段对应的段表项存放的地址为 M+6K</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="地址变换机制"><a class="markdownIt-Anchor" href="#地址变换机制"></a> 地址变换机制</h3>
+<ol>
+<li>根据逻辑地址得到<strong>段号</strong>S、<strong>段内地址</strong>W</li>
+<li><strong>越界检查</strong>，段号S与段表寄存器（<strong>段表始址</strong>F，<strong>段表长度</strong>M）的 M 比较；若 S ≥ M（S从0开始，M最小为1，故S必小于M），则<strong>越界中断</strong>，否则继续执行</li>
+<li>查询段表(<strong>段长</strong>C，<strong>基址</strong>b)，<strong>找到对应段表项</strong>，地址为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>F</mi><mo>+</mo><mi>S</mi><mo>×</mo><mi mathvariant="normal">段</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><annotation encoding="application/x-tex">F+S\times段表项长度</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">段</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span></li>
+<li><strong>检查段内地址是否超过段长</strong>，若 W ≥ C，则<strong>越界中断</strong>，否则继续执行</li>
+<li>计算得到物理地址 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">基</mi><mi mathvariant="normal">址</mi><mi>b</mi><mo>+</mo><mi mathvariant="normal">段</mi><mi mathvariant="normal">内</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mi>W</mi></mrow><annotation encoding="application/x-tex">基址b+段内地址W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.77777em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">基</span><span class="mord cjk_fallback">址</span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">段</span><span class="mord cjk_fallback">内</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span></span></span></span></li>
+<li>访问目标内存单元</li>
+</ol>
+<h3 id="分页分段对比"><a class="markdownIt-Anchor" href="#分页分段对比"></a> 分页分段对比</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">分页</th>
+<th style="text-align:center">分段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">页是信息的<strong>物理</strong>单位</td>
+<td style="text-align:center">段是信息的<strong>逻辑</strong>单位</td>
+</tr>
+<tr>
+<td style="text-align:center">系统行为，<strong>用户不可见</strong></td>
+<td style="text-align:center">逻辑需求，<strong>用户可见</strong></td>
+</tr>
+<tr>
+<td style="text-align:center">页大小固定</td>
+<td style="text-align:center">段大小不定</td>
+</tr>
+<tr>
+<td style="text-align:center">地址空间<strong>一维</strong>（地址）</td>
+<td style="text-align:center">地址空间<strong>二维</strong>（段名，段内地址）</td>
+</tr>
+<tr>
+<td style="text-align:center">-</td>
+<td style="text-align:center"><strong>易信息共享和保护</strong>（<strong>纯代码或可重入代码</strong>）</td>
+</tr>
+<tr>
+<td style="text-align:center">单级页表<strong>两次</strong>访存</td>
+<td style="text-align:center">段表–内存，<strong>两次</strong>访存</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>可</strong>引入快表</td>
+<td style="text-align:center"><strong>可</strong>引入快表</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>信息共享保护通过<strong>多个段表项</strong>引用<strong>同一段</strong>实现，而分页可能会使共享段被强制分隔为两个页面的一部分，而难以划定共享区</p>
+</li>
+<li>
+<p>段表改造</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">段号（隐含）</th>
+<th style="text-align:center">段长</th>
+<th style="text-align:center">基址</th>
+<th style="text-align:center">是否允许其他进程访问</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">7K</td>
+<td style="text-align:center">80K</td>
+<td style="text-align:center">不允许</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">3K</td>
+<td style="text-align:center">120K</td>
+<td style="text-align:center"><strong>允许</strong></td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">6K</td>
+<td style="text-align:center">40K</td>
+<td style="text-align:center">不允许</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<h3 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/VKwzZujdb38EWDk.png" alt="image-20200508152936119" /></p>
+<h2 id="段页式"><a class="markdownIt-Anchor" href="#段页式"></a> 段页式</h2>
+<h3 id="分段分页优缺点分析"><a class="markdownIt-Anchor" href="#分段分页优缺点分析"></a> 分段分页优缺点分析</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">优点</th>
+<th style="text-align:center">缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>分页</strong></td>
+<td style="text-align:center">内存空间利用率高<br /><strong>不会产生外部碎片</strong><br />仅少量内部碎片</td>
+<td style="text-align:center">不便于按逻辑模块实现信息共享和保护</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>分段</strong></td>
+<td style="text-align:center">可按逻辑模块实现信息共享和保护</td>
+<td style="text-align:center">段长<strong>过大</strong>不便于分配连续空间<br /><strong>会产生外部碎片</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="管理流程"><a class="markdownIt-Anchor" href="#管理流程"></a> 管理流程</h3>
+<ol>
+<li>
+<p>进程按逻辑<strong>分段</strong>，再将<strong>各段分页</strong></p>
+</li>
+<li>
+<p>将<strong>内存空间</strong>分为大小相同的若干个<strong>页框</strong></p>
+</li>
+<li>
+<p>将各页面分别装入内存块中</p>
+</li>
+</ol>
+<h3 id="地址结构-2"><a class="markdownIt-Anchor" href="#地址结构-2"></a> 地址结构</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">段号</th>
+<th style="text-align:center">页号</th>
+<th style="text-align:center">页内偏移量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">31 ······ 16</td>
+<td style="text-align:center">15 ······ 12</td>
+<td style="text-align:center">11 ······ 0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>段号位数决定了每个进程最多分几段</li>
+<li>页号位数决定每个段最多分几页</li>
+<li>页内偏移量决定了页面的大小、内存块大小是多少</li>
+</ul>
+<blockquote>
+<p>上例中，按字节寻址，每个进程最多 2<sup>16</sup> = 64K 个段，每段最多 2<sup>4</sup> = 16 页，每页大小 2<sup>12</sup> = 4 KB</p>
+</blockquote>
+<ul>
+<li>分段和段内地址对用户可见，故段页式管理的地址结构是<strong>二维</strong>的</li>
+</ul>
+<h3 id="段表与页表"><a class="markdownIt-Anchor" href="#段表与页表"></a> 段表与页表</h3>
+<ul>
+<li>
+<p>一个进程对应多个段</p>
+<p>一个段对应一个段表项</p>
+<p>一个段可能对应多个页（即页表长度 ≥ 1）</p>
+</li>
+<li>
+<p>段表</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">段号（隐含）</th>
+<th style="text-align:center"><strong>页表长度</strong></th>
+<th style="text-align:center">页表存放块号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">···</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">···</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>每个段对应一个段表项，每个段表项由段号、<strong>页表长度</strong>、<strong>页表存放块号</strong>（页表起始地址）组成</li>
+<li><strong>每个段表项长度相等</strong>，故段号可隐含</li>
+<li>根据存放块号算出<strong>页表存放的内存地址</strong></li>
+</ul>
+</li>
+<li>
+<p>页表</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">页号</th>
+<th style="text-align:center">内存块号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">k</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">n</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<h3 id="地址变换机制-2"><a class="markdownIt-Anchor" href="#地址变换机制-2"></a> 地址变换机制</h3>
+<ol>
+<li>
+<p>根据逻辑地址得到<strong>段号</strong>、<strong>页号</strong>、<strong>页内偏移量</strong></p>
+<p>逻辑地址A：段号S | 页号P | 页内偏移量W</p>
+</li>
+<li>
+<p>越界检查，S 与段表寄存器（段表始址F | 段表长度M）的 M 比较，若 S ≥ M，则越界中断</p>
+</li>
+<li>
+<p>查询段表找到对应段表项，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">段</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">存</mi><mi mathvariant="normal">放</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mo>=</mo><mi>F</mi><mo>+</mo><mi>S</mi><mo>×</mo><mi mathvariant="normal">段</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><annotation encoding="application/x-tex">段表项存放地址 = F + S \times 段表项长度</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">段</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">存</span><span class="mord cjk_fallback">放</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">段</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span></p>
+</li>
+<li>
+<p><strong>第一次访存</strong>，检查页号P是否越界，若 P ≥ 页表长度，则越界中断</p>
+</li>
+<li>
+<p><strong>第二次访存</strong>，根据页表存放块号、页号查询页表，找到对应页表项</p>
+</li>
+<li>
+<p><strong>第三次访存</strong>，根据内存块号、页内偏移量得到最终的物理地址</p>
+</li>
+<li>
+<p>访问目标单元</p>
+</li>
+</ol>
+<ul>
+<li>可引入快表机构，用段号和页号作为查询快表的关键字，若快表<strong>命中</strong>，则<strong>一次</strong>访存</li>
+</ul>
+<h3 id="小结-2"><a class="markdownIt-Anchor" href="#小结-2"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/dMYgPKIDZ41JTma.png" alt="image-20200508162012372" /></p>
+<h2 id="虚拟技术"><a class="markdownIt-Anchor" href="#虚拟技术"></a> 虚拟技术</h2>
+<h3 id="背景"><a class="markdownIt-Anchor" href="#背景"></a> 背景</h3>
+<ul>
+<li>
+<p>传统存储，暂时不需要的数据也会<strong>长期占用</strong>内存，导致内存利用率低</p>
+</li>
+<li>
+<p><strong>一次性</strong>：作业必须一次性全部装入内存后才可运行，导致大作业无法运行，多道程序并发度下降</p>
+</li>
+<li>
+<p><strong>驻留性</strong>：作业一旦装入，就驻留至运行结束，浪费内存资源</p>
+</li>
+</ul>
+<blockquote>
+<p>4 G 的内存运行不了 6 G 的游戏</p>
+</blockquote>
+<ul>
+<li><strong>高速缓冲技术</strong>思想：近期频繁使用的数据放到更高速的存储器中，暂时用不到的放到更低速存储器</li>
+</ul>
+<h3 id="定义和特征"><a class="markdownIt-Anchor" href="#定义和特征"></a> 定义和特征</h3>
+<ul>
+<li>
+<p><strong>虚拟内存</strong>：程序无需全部装入即可运行，运行时根据需要动态调入数据，若内存不够，还需换出一些数据</p>
+</li>
+<li>
+<p>虚拟内存的<strong>最大容量</strong>是由计算机的地址结构（CPU寻址范围）确定<br />
+虚拟内存的<strong>实际容量</strong> = min（内外存容量和，CPU寻址范围）</p>
+<blockquote>
+<p>某计算机的地址结构为32位，按字节编址，内存大小为512 MB，外存大小为2 GB。</p>
+<p>虚拟内存最大容量 = 2<sup>32</sup> B = 4 GB</p>
+<p>实际容量 = min（512 MB+2 GB，4 GB）= 2.5 GB</p>
+</blockquote>
+</li>
+<li>
+<p><strong>特征</strong></p>
+<ul>
+<li><strong>多次性</strong>：无需在作业运行时一次性全部装入内存，而是允许被分成多次调入内存</li>
+<li><strong>对换性</strong>：在作业运行时无需常驻内存，允许按需要换入换出</li>
+<li><strong>虚拟性</strong>：从逻辑上扩充了内存容量</li>
+</ul>
+</li>
+</ul>
+<h3 id="实现"><a class="markdownIt-Anchor" href="#实现"></a> 实现</h3>
+<ul>
+<li>建立在<strong>离散分配</strong>的内存管理方式基础上</li>
+<li>访问信息不在内存时，操作系统将其从外存调入内存，然后继续执行 （<strong>请求调页</strong>（段）功能）</li>
+<li>内存空间不够时，将内存中暂时用不到的信息换出外存 （页面（段）<strong>置换</strong>功能）</li>
+<li>请求分页存储管理<br />
+请求分段存储管理<br />
+请求段页式存储管理</li>
+</ul>
+<h3 id="小结-3"><a class="markdownIt-Anchor" href="#小结-3"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/Coxim5PGZw9gM2V.png" alt="image-20200508173313381" /></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/20/%E8%AE%A1%E7%BD%91/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6/" rel="prev" title="流量控制">
+      <i class="fa fa-chevron-left"></i> 流量控制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-10-PV操作典型例题">
+      OS-10-PV操作典型例题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第十六次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第十六次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分段"><span class="nav-number">1.1.</span> <span class="nav-text"> 分段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念"><span class="nav-number">1.1.1.</span> <span class="nav-text"> 概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#地址结构"><span class="nav-number">1.1.2.</span> <span class="nav-text"> 地址结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#段表"><span class="nav-number">1.1.3.</span> <span class="nav-text"> 段表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#地址变换机制"><span class="nav-number">1.1.4.</span> <span class="nav-text"> 地址变换机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分页分段对比"><span class="nav-number">1.1.5.</span> <span class="nav-text"> 分页分段对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.1.6.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#段页式"><span class="nav-number">1.2.</span> <span class="nav-text"> 段页式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分段分页优缺点分析"><span class="nav-number">1.2.1.</span> <span class="nav-text"> 分段分页优缺点分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#管理流程"><span class="nav-number">1.2.2.</span> <span class="nav-text"> 管理流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#地址结构-2"><span class="nav-number">1.2.3.</span> <span class="nav-text"> 地址结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#段表与页表"><span class="nav-number">1.2.4.</span> <span class="nav-text"> 段表与页表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#地址变换机制-2"><span class="nav-number">1.2.5.</span> <span class="nav-text"> 地址变换机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">1.2.6.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟技术"><span class="nav-number">1.3.</span> <span class="nav-text"> 虚拟技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">1.3.1.</span> <span class="nav-text"> 背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义和特征"><span class="nav-number">1.3.2.</span> <span class="nav-text"> 定义和特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现"><span class="nav-number">1.3.3.</span> <span class="nav-text"> 实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-3"><span class="nav-number">1.3.4.</span> <span class="nav-text"> 小结</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

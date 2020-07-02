@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="分页概念	地址转换机制	快表机制	多级页表">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-15-分页存储管理">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="分页概念	地址转换机制	快表机制	多级页表">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/05/02/8ybO1IJckz46XPs.png">
+<meta property="og:image" content="https://i.loli.net/2020/05/02/ubHpDMfBPmgV4Ce.png">
+<meta property="og:image" content="https://i.loli.net/2020/05/02/ZXxtQna9Mm2k74u.png">
+<meta property="og:image" content="https://i.loli.net/2020/05/02/ASRVfx1XoMuim7U.png">
+<meta property="og:image" content="https://i.loli.net/2020/05/02/mR5n1i6BhfwJ3tM.png">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:50:20.050Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/05/02/8ybO1IJckz46XPs.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-15-分页存储管理 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-15-分页存储管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:50:20" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+            <div class="post-description">分页概念	地址转换机制	快表机制	多级页表</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#%E5%88%86%E9%A1%B5%E5%AD%98%E5%82%A8">分页存储</a></li>
+<li><a href="#%E5%88%86%E9%A1%B5%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2%E6%9C%BA%E5%88%B6">分页地址转换机制</a></li>
+<li><a href="#%E5%BF%AB%E8%A1%A8%E6%9C%BA%E5%88%B6">快表机制</a></li>
+<li><a href="#%E5%BF%AB%E6%85%A2%E8%A1%A8%E6%9C%BA%E5%88%B6%E5%AF%B9%E6%AF%94">快慢表机制对比</a></li>
+<li><a href="#%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8">多级页表</a></li>
+</ul>
+</p>
+<h1 id="操作系统第十五次课小结"><a class="markdownIt-Anchor" href="#操作系统第十五次课小结"></a> 操作系统第十五次课小结</h1>
+<h2 id="分页存储"><a class="markdownIt-Anchor" href="#分页存储"></a> 分页存储</h2>
+<ol>
+<li>
+<p>思想：把内存分成<strong>相等的若干区</strong>，按照分区大小<strong>拆分进程</strong></p>
+</li>
+<li>
+<p>概念：</p>
+<ul>
+<li>内存划分<strong>页框</strong>，进程拆分为若干<strong>页（面）</strong></li>
+<li>每个分区是一个<strong>页框</strong>（内存块、物理块），每个页框一个<strong>页框号</strong>（内存块号 ···）</li>
+<li>每个<strong>页面</strong>大小等于页框，有一个<strong>页号</strong></li>
+<li>页框号和页号均<strong>从0开始</strong></li>
+<li>进程拆分的最后一个页面比页框小，会有剩余，因此，<strong>页框设置过大，可能产生较大的内部碎片</strong></li>
+<li>操作系统<strong>以页框为单位</strong>为进程分配内存，进程页面与内存页框<strong>一一对应</strong></li>
+<li><strong>页面不必连续存放也不必按顺序</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>十进制的地址转换计算</strong></p>
+<ul>
+<li>计算公式：
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">号</mi><mo>=</mo><mo fence="true">⌊</mo><mfrac><mrow><mi mathvariant="normal">逻</mi><mi mathvariant="normal">辑</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi></mrow><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow></mfrac><mo fence="true">⌋</mo></mrow><annotation encoding="application/x-tex">页号 = \biggl\lfloor \frac{逻辑地址}{页面长度}\biggr\rfloor</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">号</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="mopen"><span class="delimsizing size3">⌊</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.394em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">页</span><span class="mord cjk_fallback mtight">面</span><span class="mord cjk_fallback mtight">长</span><span class="mord cjk_fallback mtight">度</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">逻</span><span class="mord cjk_fallback mtight">辑</span><span class="mord cjk_fallback mtight">地</span><span class="mord cjk_fallback mtight">址</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose"><span class="delimsizing size3">⌋</span></span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">内</mi><mi mathvariant="normal">偏</mi><mi mathvariant="normal">移</mi><mi mathvariant="normal">量</mi><mo>=</mo><mi mathvariant="normal">逻</mi><mi mathvariant="normal">辑</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mtext> </mtext><mi>m</mi><mi>o</mi><mi>d</mi><mtext> </mtext><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><annotation encoding="application/x-tex">页内偏移量 = 逻辑地址\ mod\ 页面长度</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">内</span><span class="mord cjk_fallback">偏</span><span class="mord cjk_fallback">移</span><span class="mord cjk_fallback">量</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord cjk_fallback">逻</span><span class="mord cjk_fallback">辑</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mspace"> </span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mspace"> </span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">面</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span></li>
+<li>页面在内存中的起始位置由操作系统的某种数据结构记录</li>
+<li><strong>页面大小一般为 2 的整数幂</strong></li>
+</ul>
+</li>
+<li>计算步骤：
+<ul>
+<li>算出逻辑地址对应的<strong>页号</strong></li>
+<li>获取对应页面在内存的<strong>起始地址</strong></li>
+<li>算出<strong>页内偏移量</strong></li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">物</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mo>=</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">始</mi><mi mathvariant="normal">址</mi><mo>+</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">内</mi><mi mathvariant="normal">偏</mi><mi mathvariant="normal">移</mi><mi mathvariant="normal">量</mi></mrow><annotation encoding="application/x-tex">物理地址 = 页面始址 + 页内偏移量</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">物</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">面</span><span class="mord cjk_fallback">始</span><span class="mord cjk_fallback">址</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">内</span><span class="mord cjk_fallback">偏</span><span class="mord cjk_fallback">移</span><span class="mord cjk_fallback">量</span></span></span></span></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>页面大小为50，1、2 号页起始地址为400、450，逻辑地址为80的内存单元，对应物理地址为：</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">号</mi><mo>=</mo><mn>80</mn><mi mathvariant="normal">/</mi><mn>50</mn><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">页号 = 80 / 50 = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">号</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mord">0</span><span class="mord">/</span><span class="mord">5</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">内</mi><mi mathvariant="normal">偏</mi><mi mathvariant="normal">移</mi><mi mathvariant="normal">量</mi><mo>=</mo><mn>80</mn></mrow><annotation encoding="application/x-tex">页内偏移量 = 80 % 50 = 30</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">内</span><span class="mord cjk_fallback">偏</span><span class="mord cjk_fallback">移</span><span class="mord cjk_fallback">量</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">8</span><span class="mord">0</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">对</mi><mi mathvariant="normal">应</mi><mi mathvariant="normal">物</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mo>=</mo><mn>400</mn><mo>+</mo><mn>30</mn><mo>=</mo><mn>430</mn></mrow><annotation encoding="application/x-tex">对应物理地址 = 400 + 30  = 430</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">对</span><span class="mord cjk_fallback">应</span><span class="mord cjk_fallback">物</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">4</span><span class="mord">0</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">3</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord">3</span><span class="mord">0</span></span></span></span></p>
+</blockquote>
+</li>
+<li>
+<p><strong>二进制的地址转换计算</strong></p>
+<ul>
+<li>
+<p>分为两部分，<strong>从右至左，前n位为页号，后m为页内偏移量</strong>，则<strong>页面大小</strong>是 <strong>2<sup>m</sup></strong> 个内存单元，一个<strong>进程最多</strong>允许 <strong>2<sup>n</sup></strong> 个页面</p>
+</li>
+<li>
+<p>假设地址长度32位，页内偏移量12位，则页号20位</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>31</mn><mtext> </mtext><mo>⋯</mo><mo>⋯</mo><mtext> </mtext><mn>12</mn></mrow><annotation encoding="application/x-tex">31\ \cdots \cdots \ 12</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">3</span><span class="mord">1</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace"> </span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace"> </span><span class="mord">1</span><span class="mord">2</span></span></span></span></th>
+<th style="text-align:center"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>11</mn><mtext> </mtext><mo>⋯</mo><mo>⋯</mo><mtext> </mtext><mn>0</mn></mrow><annotation encoding="application/x-tex">11 \ \cdots \cdots \ 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">1</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace"> </span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace"> </span><span class="mord">0</span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">页号 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span></span></span></span></td>
+<td style="text-align:center">页内偏移量 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>W</mi></mrow><annotation encoding="application/x-tex">W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span></span></span></span></td>
+</tr>
+<tr>
+<td style="text-align:center">0000000000000000<strong>11</strong>00<br />（第10页）</td>
+<td style="text-align:center">00000000<strong>1111</strong><br />（第15个单元）</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p>页表</p>
+<ul>
+<li><strong>记录</strong>每个页面在内存中的<strong>存放位置</strong>，<strong>进程页面与实际存放的内存块的对应关系</strong></li>
+<li>一个进程对应一张页表，进程每一页对应一个页表项</li>
+<li>每个页表项由<strong>页号</strong>和<strong>块号</strong>组成</li>
+<li>页表项<strong>长度相同</strong>，页号是<strong>隐含</strong>的</li>
+<li><strong>页号可通过起始地址与页表项长度计算得到</strong>，各页表项按顺序连续存放在内存，若页表起始地址为 X，则 M 号对应项的地址为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>X</mi><mo>+</mo><mn>3</mn><mi>M</mi></mrow><annotation encoding="application/x-tex">X + 3M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">3</span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span></span></span></span></li>
+</ul>
+</li>
+<li>
+<p>分页小结</p>
+<p><img src="https://i.loli.net/2020/05/02/8ybO1IJckz46XPs.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="分页地址转换机制"><a class="markdownIt-Anchor" href="#分页地址转换机制"></a> 分页地址转换机制</h2>
+<ol>
+<li>
+<p><strong>页表寄存器</strong>（PTR）：记录 <strong>页表在内存的起始地址</strong>F 和 <strong>页表长度</strong>M，存放于进程控制块（PCB）中</p>
+</li>
+<li>
+<p>设页面大小为L，逻辑地址A 到 物理地址E 的<strong>变换过程</strong>：</p>
+<ul>
+<li>计算 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">号</mi><mi>P</mi><mo>=</mo><mi>A</mi><mi mathvariant="normal">/</mi><mi>L</mi></mrow><annotation encoding="application/x-tex">页号P = A/L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">号</span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">A</span><span class="mord">/</span><span class="mord mathdefault">L</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">内</mi><mi mathvariant="normal">偏</mi><mi mathvariant="normal">移</mi><mi mathvariant="normal">量</mi><mi>M</mi><mo>=</mo><mi>A</mi><mtext> </mtext><mi>m</mi><mi>o</mi><mi>d</mi><mtext> </mtext><mi>L</mi></mrow><annotation encoding="application/x-tex">页内偏移量M = A\ mod\ L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">内</span><span class="mord cjk_fallback">偏</span><span class="mord cjk_fallback">移</span><span class="mord cjk_fallback">量</span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">A</span><span class="mspace"> </span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mspace"> </span><span class="mord mathdefault">L</span></span></span></span></li>
+<li><strong>比较</strong>页号与页表长度，若<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mo>≥</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P \geq M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.13597em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span></span></span></span>，则<strong>发生越界</strong>，注意 P 从0开始，而 M 最小为1</li>
+<li>页号P 对应的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">页</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mo>=</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">起</mi><mi mathvariant="normal">始</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mi>F</mi><mo>+</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">号</mi><mi>P</mi><mo>×</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">长</mi><mi mathvariant="normal">度</mi></mrow><annotation encoding="application/x-tex">页表项地址 = 页表起始地址F + 页号P \times 页表项长度</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">起</span><span class="mord cjk_fallback">始</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">号</span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">长</span><span class="mord cjk_fallback">度</span></span></span></span>，取出 表项内容b 即为<strong>内存块号</strong></li>
+<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">物</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mi>E</mi><mo>=</mo><mi mathvariant="normal">内</mi><mi mathvariant="normal">存</mi><mi mathvariant="normal">块</mi><mi mathvariant="normal">号</mi><mi>b</mi><mo>×</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">大</mi><mi mathvariant="normal">小</mi><mi>L</mi><mo>+</mo><mi mathvariant="normal">偏</mi><mi mathvariant="normal">移</mi><mi mathvariant="normal">量</mi><mi>M</mi></mrow><annotation encoding="application/x-tex">物理地址E = 内存块号b \times 页面大小L + 偏移量M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">物</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.77777em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">内</span><span class="mord cjk_fallback">存</span><span class="mord cjk_fallback">块</span><span class="mord cjk_fallback">号</span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">面</span><span class="mord cjk_fallback">大</span><span class="mord cjk_fallback">小</span><span class="mord mathdefault">L</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">偏</span><span class="mord cjk_fallback">移</span><span class="mord cjk_fallback">量</span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span></span></span></span></li>
+</ul>
+</li>
+<li>
+<p>例题：</p>
+<blockquote>
+<p>例:若页面大小L为 1K 字节，页号2对应的内存块号b=8，将逻辑地址A=2500转换为物理地址E。</p>
+<p><strong>等价描述</strong>:某系统按字节寻址，逻辑地址结构中，页内偏移量占10位，页号2对应的内存块号b=8，将逻辑地址 A=2500 转换为物理地址E。</p>
+<p>偏移量占10位，说明页面大小为 2<sup>10</sup> B = 1 KB</p>
+<p>① 计算页号、偏移量</p>
+<p>​	<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mo>=</mo><mn>2500</mn><mi mathvariant="normal">/</mi><mn>1</mn><mi>K</mi><mo>=</mo><mn>2</mn><mi mathvariant="normal">；</mi><mi>W</mi><mo>=</mo><mn>2500</mn><mtext> </mtext><mi>m</mi><mi>o</mi><mi>d</mi><mtext> </mtext><mn>1</mn><mi>K</mi><mo>=</mo><mn>452</mn></mrow><annotation encoding="application/x-tex">P = 2500 / 1K = 2；W = 2500\ mod\  1K = 452</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mord">/</span><span class="mord">1</span><span class="mord mathdefault" style="margin-right:0.07153em;">K</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">2</span><span class="mord cjk_fallback">；</span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord">2</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mspace"> </span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mspace"> </span><span class="mord">1</span><span class="mord mathdefault" style="margin-right:0.07153em;">K</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord">5</span><span class="mord">2</span></span></span></span></p>
+<p>② 由已知条件知，未越界，内存块号为 8</p>
+<p>③ <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">物</mi><mi mathvariant="normal">理</mi><mi mathvariant="normal">地</mi><mi mathvariant="normal">址</mi><mi>E</mi><mo>=</mo><mn>8</mn><mo>×</mo><mn>1</mn><mi>K</mi><mo>+</mo><mi>W</mi><mo>=</mo><mn>8</mn><mo>×</mo><mn>1024</mn><mo>+</mo><mn>452</mn><mo>=</mo><mn>8644</mn></mrow><annotation encoding="application/x-tex">物理地址E = 8 \times 1K + W = 8 \times 1024 + 452 = 8644</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">物</span><span class="mord cjk_fallback">理</span><span class="mord cjk_fallback">地</span><span class="mord cjk_fallback">址</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mord mathdefault" style="margin-right:0.07153em;">K</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">2</span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord">5</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">8</span><span class="mord">6</span><span class="mord">4</span><span class="mord">4</span></span></span></span></p>
+</blockquote>
+</li>
+<li>
+<p>为方便页表存放和查询，会特意<strong>扩大</strong>页表项长度，<strong>使得页面恰好装得下整数个页表项</strong>，以确保<strong>连续存放</strong></p>
+</li>
+<li>
+<p>小结</p>
+<p><img src="https://i.loli.net/2020/05/02/ubHpDMfBPmgV4Ce.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="快表机制"><a class="markdownIt-Anchor" href="#快表机制"></a> 快表机制</h2>
+<ol>
+<li>
+<p><strong>时间局部性</strong>：指令或数据可能被多次访问，因为程序存在大量的循环<br />
+<strong>空间局部性</strong>：单元被访问，邻近单元易被再次访问，因为很多数据连续存放</p>
+</li>
+<li>
+<p>地址变换机制中，<strong>可能连续多次访问到的都是同一个页表项</strong></p>
+</li>
+<li>
+<p>计算过程;</p>
+<ul>
+<li>计算页号和偏移量</li>
+<li><strong>在快表中查询页号</strong>，若<strong>命中</strong>则<strong>直接使用</strong>对应内存块，将内存块号与偏移量拼接成物理地址，最后访问存储单元</li>
+<li>若<strong>未命中</strong>，则<strong>访问内存</strong>中的页表找到对应内存块，<strong>将页号与内存块号存入快表中</strong>，再拼接得到物理地址并访问</li>
+<li>若快表命中，则仅需<strong>一次访存</strong>；若未命中，则访问页表和存储单元，共<strong>两次访存</strong></li>
+<li>若存入时快表已满，按照一定算法对旧的表项进行替换</li>
+</ul>
+</li>
+<li>
+<p>例题</p>
+<blockquote>
+<p>例：某系统使用基本分页存储管理，并采用了具有快表的地址变换机构。访问一次快表耗时1us，访问一次内存耗时100us。若快表的命中率为90%，那么访问一个逻辑地址的平均耗时是多少？</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">耗</mi><mi mathvariant="normal">时</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>100</mn><mo stretchy="false">)</mo><mo>×</mo><mn>90</mn><mi mathvariant="normal">%</mi><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>100</mn><mo>+</mo><mn>100</mn><mo stretchy="false">)</mo><mo>×</mo><mn>10</mn><mi mathvariant="normal">%</mi><mo>=</mo><mn>111</mn><mi>u</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">耗时 = (1+100) \times 90\% + (1+100+100) \times 10\% = 111 us</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">耗</span><span class="mord cjk_fallback">时</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.08333em;"></span><span class="mord">9</span><span class="mord">0</span><span class="mord">%</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.80556em;vertical-align:-0.05556em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">%</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord mathdefault">u</span><span class="mord mathdefault">s</span></span></span></span></p>
+<p>有的系统也支持快慢表同时查询，则结果为</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">耗</mi><mi mathvariant="normal">时</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>100</mn><mo stretchy="false">)</mo><mo>×</mo><mn>90</mn><mi mathvariant="normal">%</mi><mo>+</mo><mo stretchy="false">(</mo><mn>100</mn><mo>+</mo><mn>100</mn><mo stretchy="false">)</mo><mo>×</mo><mn>10</mn><mi mathvariant="normal">%</mi><mo>=</mo><mn>110.9</mn><mi>u</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">耗时 = (1+100) \times 90\% + (100+100)\times 10\% = 110.9 us</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">耗</span><span class="mord cjk_fallback">时</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.08333em;"></span><span class="mord">9</span><span class="mord">0</span><span class="mord">%</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.80556em;vertical-align:-0.05556em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">%</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">1</span><span class="mord">0</span><span class="mord">.</span><span class="mord">9</span><span class="mord mathdefault">u</span><span class="mord mathdefault">s</span></span></span></span></p>
+<p>若未使用快表机制</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">耗</mi><mi mathvariant="normal">时</mi><mo>=</mo><mn>100</mn><mo>+</mo><mn>100</mn><mo>=</mo><mn>200</mn><mi>u</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">耗时 = 100 + 100 = 200 us</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">耗</span><span class="mord cjk_fallback">时</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mord">0</span><span class="mord mathdefault">u</span><span class="mord mathdefault">s</span></span></span></span></p>
+</blockquote>
+</li>
+<li>
+<p>快表计算过程图示</p>
+<p><img src="https://i.loli.net/2020/05/02/ZXxtQna9Mm2k74u.png" alt="" /></p>
+</li>
+</ol>
+<h2 id="快慢表机制对比"><a class="markdownIt-Anchor" href="#快慢表机制对比"></a> 快慢表机制对比</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">地址变换过程</th>
+<th style="text-align:center">访存次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">基本地址</td>
+<td style="text-align:center">① 算页号、页内偏移量<br />② 检查页号合法性<br />③ 查页表，找对应内存块号<br />④ 拼接得到物理地址<br />⑤ 访问目标内存单元</td>
+<td style="text-align:center"><strong>两次</strong></td>
+</tr>
+<tr>
+<td style="text-align:center">具有快表</td>
+<td style="text-align:center">① 算页号、页内偏移量<br />② 检查页号合法性<br />③ <strong>查快表</strong>，命中则⑤，否则进行④<br />④ 查页表找内存块号，<strong>并将页表项复制到快表</strong><br />⑤ 拼接得到物理地址<br />⑥ 访问目标内存单元</td>
+<td style="text-align:center"><strong>快表命中则一次</strong><br />未命中需两次</td>
+</tr>
+</tbody>
+</table>
+<h2 id="多级页表"><a class="markdownIt-Anchor" href="#多级页表"></a> 多级页表</h2>
+<ol>
+<li>
+<p><strong>页目录表</strong>（外层页表、顶层页表）：将现有页表<strong>分组离散</strong>放入内存块中，为离散分配的页表再建立一张页表。即<strong>拆分低级页表，使用高级连续页表记录低级离散页表</strong></p>
+</li>
+<li>
+<p>两级页表<strong>结构</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>31</mn><mo>⋯</mo><mo>⋯</mo><mn>22</mn></mrow><annotation encoding="application/x-tex">31 \cdots \cdots 22</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">3</span><span class="mord">1</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">2</span><span class="mord">2</span></span></span></span></th>
+<th style="text-align:center"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>21</mn><mo>⋯</mo><mo>⋯</mo><mn>12</mn></mrow><annotation encoding="application/x-tex">21 \cdots \cdots 12</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">2</span><span class="mord">1</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">1</span><span class="mord">2</span></span></span></span></th>
+<th style="text-align:center"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>11</mn><mo>⋯</mo><mo>⋯</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">11 \cdots \cdots 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">1</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">一级页号</td>
+<td style="text-align:center">二级页号</td>
+<td style="text-align:center">页内偏移量</td>
+</tr>
+</tbody>
+</table>
+<p><img src="https://i.loli.net/2020/05/02/ASRVfx1XoMuim7U.png" alt="" /></p>
+</li>
+<li>
+<p><strong>使用步骤</strong></p>
+<ul>
+<li>按照地址结构<strong>拆分</strong>逻辑地址</li>
+<li>从PCB中读出页目录表始址，根据一级页号查目录表，找到下级页表存放的内存块</li>
+<li>根据二级页号查二级页表，找到最终访问内存块号</li>
+<li>结合偏移量获得物理地址</li>
+</ul>
+</li>
+<li>
+<p><strong>没有必要整个页表常驻内存</strong>，一段时间内进程可能只需访问某几个特定的页面</p>
+<ul>
+<li>
+<p>虚拟存储技术，在<strong>需要</strong>访问页面时，<strong>才</strong>把页面<strong>调入内存</strong>，增加标志位记录调入状态</p>
+</li>
+<li>
+<p>若访问页面未调入，<strong>则产生缺页中断</strong>（内中断），而后目标页面<strong>从外存调入内存</strong></p>
+</li>
+<li>
+<table>
+<thead>
+<tr>
+<th>一级页号</th>
+<th>内存块号</th>
+<th>是否已调入</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>3</td>
+<td>是</td>
+</tr>
+<tr>
+<td>1</td>
+<td>无</td>
+<td>否</td>
+</tr>
+<tr>
+<td>······</td>
+<td>······</td>
+<td>······</td>
+</tr>
+<tr>
+<td>1023</td>
+<td>······</td>
+<td>······</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>细节</strong></p>
+<ul>
+<li>两级页表<strong>访存次数</strong>分析
+<ul>
+<li>第一次：访问内存中的<strong>页目录表</strong></li>
+<li>第二次：<strong>二级页表</strong></li>
+<li>第三次：<strong>目标内存存储单元</strong></li>
+</ul>
+</li>
+<li>多级页表机制中，<strong>各级页表大小不超过一个页面</strong></li>
+</ul>
+<blockquote>
+<p>某系统按字节编址，采用40位逻辑地址，页面大小为4KB，页表项大小为4B，采用纯页式存储，则需（  ）级页表，页内偏移量为（  ）位？</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∵</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">大</mi><mi mathvariant="normal">小</mi><mo>=</mo><mn>4</mn><mi>K</mi><mi>B</mi><mo>=</mo><msup><mn>2</mn><mn>12</mn></msup><mi>B</mi></mrow><annotation encoding="application/x-tex">\because 页面大小 = 4 KB = 2^{12} B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∵</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">面</span><span class="mord cjk_fallback">大</span><span class="mord cjk_fallback">小</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord mathdefault" style="margin-right:0.07153em;">K</span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo><mi mathvariant="normal">偏</mi><mi mathvariant="normal">移</mi><mi mathvariant="normal">量</mi><mi mathvariant="normal">为</mi><mn>12</mn><mi mathvariant="normal">位</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">页</mi><mi mathvariant="normal">号</mi><mo>=</mo><mn>40</mn><mo>−</mo><mn>12</mn><mo>=</mo><mn>28</mn><mi mathvariant="normal">位</mi></mrow><annotation encoding="application/x-tex">\therefore 偏移量为 12  位，页号 = 40 - 12 = 28 位</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord cjk_fallback">偏</span><span class="mord cjk_fallback">移</span><span class="mord cjk_fallback">量</span><span class="mord cjk_fallback">为</span><span class="mord">1</span><span class="mord">2</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">号</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">4</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">2</span><span class="mord">8</span><span class="mord cjk_fallback">位</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∵</mo><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">大</mi><mi mathvariant="normal">小</mi><mo>=</mo><msup><mn>2</mn><mn>12</mn></msup><mi>B</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">页</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">大</mi><mi mathvariant="normal">小</mi><mo>=</mo><mn>4</mn><mi>B</mi></mrow><annotation encoding="application/x-tex">\because 页面大小 = 2^{12} B，页表项大小 = 4 B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∵</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">面</span><span class="mord cjk_fallback">大</span><span class="mord cjk_fallback">小</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">大</span><span class="mord cjk_fallback">小</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo><mi mathvariant="normal">每</mi><mi mathvariant="normal">个</mi><mi mathvariant="normal">页</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">页</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">总</mi><mi mathvariant="normal">数</mi><mo>=</mo><mfrac><mrow><msup><mn>2</mn><mn>12</mn></msup><mi>B</mi></mrow><mrow><mn>4</mn><mi>B</mi></mrow></mfrac><mo>=</mo><msup><mn>2</mn><mn>1</mn></msup><mn>0</mn></mrow><annotation encoding="application/x-tex">\therefore 每个页面页表项总数  = \frac {2^{12} B} {4 B} = 2^10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mord cjk_fallback">每</span><span class="mord cjk_fallback">个</span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">面</span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">总</span><span class="mord cjk_fallback">数</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.36292em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01792em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">4</span><span class="mord mathdefault mtight" style="margin-right:0.05017em;">B</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913142857142857em;"><span style="top:-2.931em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mord mathdefault mtight" style="margin-right:0.05017em;">B</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mord">0</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo><mi mathvariant="normal">每</mi><mi mathvariant="normal">级</mi><mi mathvariant="normal">页</mi><mi mathvariant="normal">表</mi><mi mathvariant="normal">最</mi><mi mathvariant="normal">多</mi><mi mathvariant="normal">由</mi><mn>10</mn><mi mathvariant="normal">个</mi><mi mathvariant="normal">二</mi><mi mathvariant="normal">进</mi><mi mathvariant="normal">制</mi><mi mathvariant="normal">位</mi><mi mathvariant="normal">来</mi><mi mathvariant="normal">映</mi><mi mathvariant="normal">射</mi></mrow><annotation encoding="application/x-tex">\therefore 每级页表最多由 10 个二进制位来映射</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord cjk_fallback">每</span><span class="mord cjk_fallback">级</span><span class="mord cjk_fallback">页</span><span class="mord cjk_fallback">表</span><span class="mord cjk_fallback">最</span><span class="mord cjk_fallback">多</span><span class="mord cjk_fallback">由</span><span class="mord">1</span><span class="mord">0</span><span class="mord cjk_fallback">个</span><span class="mord cjk_fallback">二</span><span class="mord cjk_fallback">进</span><span class="mord cjk_fallback">制</span><span class="mord cjk_fallback">位</span><span class="mord cjk_fallback">来</span><span class="mord cjk_fallback">映</span><span class="mord cjk_fallback">射</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∵</mo><mn>10</mn><mi>n</mi><mo>+</mo><mn>12</mn><mo>≥</mo><mn>40</mn><mi mathvariant="normal">，</mi><mi mathvariant="normal">解</mi><mi mathvariant="normal">得</mi><mi>n</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">\because 10 n + 12 \geq 40，解得 n = 3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∵</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.78041em;vertical-align:-0.13597em;"></span><span class="mord">1</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord">0</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">解</span><span class="mord cjk_fallback">得</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">3</span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo><mi mathvariant="normal">至</mi><mi mathvariant="normal">少</mi><mi mathvariant="normal">分</mi><mi mathvariant="normal">为</mi><mn>3</mn><mi mathvariant="normal">级</mi></mrow><annotation encoding="application/x-tex">\therefore 至少分为 3 级</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord cjk_fallback">至</span><span class="mord cjk_fallback">少</span><span class="mord cjk_fallback">分</span><span class="mord cjk_fallback">为</span><span class="mord">3</span><span class="mord cjk_fallback">级</span></span></span></span></p>
+</blockquote>
+<ul>
+<li>转换过程示例</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">逻辑地址</th>
+<th style="text-align:center">页号</th>
+<th style="text-align:center">页内偏移量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>共40位</strong></td>
+<td style="text-align:center">28</td>
+<td style="text-align:center">12</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">逻辑地址</th>
+<th style="text-align:center">一级页号</th>
+<th style="text-align:center">二级页号</th>
+<th style="text-align:center">三级页号</th>
+<th style="text-align:center">页内偏移量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>共40位</strong></td>
+<td style="text-align:center"><strong>8</strong></td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">12</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>多级页表机制小结</p>
+<p><img src="https://i.loli.net/2020/05/02/mR5n1i6BhfwJ3tM.png" alt="" /></p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-19-文件空间分配和存储">
+      <i class="fa fa-chevron-left"></i> OS-19-文件空间分配和存储
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-13-内存">
+      OS-13-内存 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第十五次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第十五次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分页存储"><span class="nav-number">1.1.</span> <span class="nav-text"> 分页存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分页地址转换机制"><span class="nav-number">1.2.</span> <span class="nav-text"> 分页地址转换机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快表机制"><span class="nav-number">1.3.</span> <span class="nav-text"> 快表机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快慢表机制对比"><span class="nav-number">1.4.</span> <span class="nav-text"> 快慢表机制对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多级页表"><span class="nav-number">1.5.</span> <span class="nav-text"> 多级页表</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

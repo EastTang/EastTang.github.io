@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="磁盘结构	调度算法（FCFS&#x2F;SSTF&#x2F;SCAN）	延迟优化	磁盘管理（初始化、引导块）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-20-磁盘">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="磁盘结构	调度算法（FCFS&#x2F;SSTF&#x2F;SCAN）	延迟优化	磁盘管理（初始化、引导块）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/rtHucoWAkEpRLg9.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/Ju6RhEFLI3QXZV8.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/u2STFY5PHEB8crW.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/D76T9nEJXUeSk1s.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/MqCmzEc2GRTOIgH.jpg">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:47:42.460Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/07/02/rtHucoWAkEpRLg9.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-20-磁盘 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-20-磁盘
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:42" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">磁盘结构	调度算法（FCFS/SSTF/SCAN）	延迟优化	磁盘管理（初始化、引导块）</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84">磁盘结构</a>
+<ul>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E5%B1%9E%E6%80%A7">基本属性</a></li>
+<li><a href="#%E7%89%A9%E7%90%86%E7%BB%93%E6%9E%84">物理结构</a></li>
+<li><a href="#%E7%A3%81%E7%9B%98%E5%88%86%E7%B1%BB">磁盘分类</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95">磁盘调度算法</a>
+<ul>
+<li><a href="#%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C%E6%97%B6%E9%97%B4">读写操作时间</a></li>
+<li><a href="#%E5%85%88%E6%9D%A5%E5%85%88%E6%9C%8D%E5%8A%A1%E7%AE%97%E6%B3%95fcfs">先来先服务算法（FCFS）</a></li>
+<li><a href="#%E6%9C%80%E7%9F%AD%E5%AF%BB%E6%89%BE%E6%97%B6%E9%97%B4%E4%BC%98%E5%85%88sstf">最短寻找时间优先（SSTF）</a></li>
+<li><a href="#%E6%89%AB%E6%8F%8F%E7%AE%97%E6%B3%95scan">扫描算法（SCAN）</a></li>
+<li><a href="#look-%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95">LOOK 调度算法</a></li>
+<li><a href="#%E5%BE%AA%E7%8E%AF%E6%89%AB%E6%8F%8F%E7%AE%97%E6%B3%95c-scan">循环扫描算法（C-SCAN）</a></li>
+<li><a href="#c-look-%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95">C-LOOK 调度算法</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-2">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E7%A3%81%E7%9B%98%E5%BB%B6%E8%BF%9F">磁盘延迟</a>
+<ul>
+<li><a href="#%E4%BA%A4%E6%9B%BF%E7%BC%96%E5%8F%B7">交替编号</a></li>
+<li><a href="#%E7%A3%81%E7%9B%98%E5%9C%B0%E5%9D%80%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1">磁盘地址结构设计</a></li>
+<li><a href="#%E9%94%99%E4%BD%8D%E5%91%BD%E5%90%8D">错位命名</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-3">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86">磁盘管理</a>
+<ul>
+<li><a href="#%E5%88%9D%E5%A7%8B%E5%8C%96">初始化</a></li>
+<li><a href="#%E5%BC%95%E5%AF%BC%E5%9D%97">引导块</a></li>
+<li><a href="#%E5%9D%8F%E5%9D%97">坏块</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-4">小结</a></li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="操作系统第二十次课小结"><a class="markdownIt-Anchor" href="#操作系统第二十次课小结"></a> 操作系统第二十次课小结</h1>
+<h2 id="磁盘结构"><a class="markdownIt-Anchor" href="#磁盘结构"></a> 磁盘结构</h2>
+<h3 id="基本属性"><a class="markdownIt-Anchor" href="#基本属性"></a> 基本属性</h3>
+<ul>
+<li>
+<p><strong>磁盘</strong>：表面由磁性物质组成，记录二进制数据</p>
+</li>
+<li>
+<p><strong>磁道</strong>：磁盘盘面分多个同心圆，每圈就是一个磁道</p>
+</li>
+<li>
+<p><strong>扇区</strong>：一个磁道划分为多个扇区，每个扇区就是一个磁盘块，<strong>存放的数据相同</strong></p>
+</li>
+<li>
+<p>最内侧磁道的<strong>扇区面积最小</strong>，<strong>数据密度最大</strong></p>
+</li>
+<li>
+<p><strong>读写数据</strong></p>
+<ol>
+<li>把<strong>磁头移动到</strong>向要读/写的扇区所在的<strong>磁道</strong></li>
+<li>转动磁盘，<strong>使目标扇区划过磁头</strong></li>
+<li>完成读/写操作</li>
+</ol>
+</li>
+</ul>
+<h3 id="物理结构"><a class="markdownIt-Anchor" href="#物理结构"></a> 物理结构</h3>
+<ul>
+<li>一个盘片可能由正反<strong>两个盘面</strong></li>
+<li><strong>每个盘面对应一个磁头</strong></li>
+<li>磁头<strong>移动方向</strong>为 沿半径 圆心 ⟷ 圆周</li>
+<li>所有磁头连在同一个磁臂上，<strong>共同移动</strong></li>
+<li>所有盘面中相对位置相同的磁盘组成<strong>柱面</strong>，故柱面定位磁道</li>
+<li>（<strong>柱面号</strong>，<strong>盘面号</strong>，<strong>扇区号</strong>）定位任意一个磁盘块</li>
+<li>根据地址读取块过程
+<ol>
+<li><strong>根据柱面号移动磁臂</strong>，让磁头指向指定柱面</li>
+<li><strong>激活指定盘面对应的磁头</strong></li>
+<li>磁盘旋转，<strong>指定扇区从磁头下划过</strong>，完成对指定扇区的读/写</li>
+</ol>
+</li>
+</ul>
+<h3 id="磁盘分类"><a class="markdownIt-Anchor" href="#磁盘分类"></a> 磁盘分类</h3>
+<ul>
+<li><strong>活动头磁盘</strong>：<strong>磁头可移动</strong>，磁臂来回伸缩带动磁头定位磁道<br />
+<strong>固定头磁盘</strong>：<strong>磁头不可移动</strong>，每个磁道一个磁头</li>
+<li><strong>可换</strong>磁盘 ---- <strong>固定</strong>磁盘</li>
+</ul>
+<h3 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/rtHucoWAkEpRLg9.jpg" alt="磁盘结构05小结" /></p>
+<h2 id="磁盘调度算法"><a class="markdownIt-Anchor" href="#磁盘调度算法"></a> 磁盘调度算法</h2>
+<h3 id="读写操作时间"><a class="markdownIt-Anchor" href="#读写操作时间"></a> 读写操作时间</h3>
+<ul>
+<li><strong>寻找（道）时间</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">T_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ：在读/写数据前，<strong>磁头移动到磁道花费的时间</strong>
+<ol>
+<li>启动磁头臂需要时间 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">s</span></span></span></span> ；</li>
+<li>移动磁头需要时间，假设匀速，每跨一条磁道耗时为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">m</span></span></span></span>，总共 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span> 条，则寻道时间 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>S</mi></msub><mo>=</mo><mi>s</mi><mo>+</mo><mi>n</mi><mo>⋅</mo><mi>m</mi></mrow><annotation encoding="application/x-tex">T_S = s + n\cdot m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.44445em;vertical-align:0em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">m</span></span></span></span></li>
+</ol>
+</li>
+<li><strong>延迟时间</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">T_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.00773em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ：<strong>通过旋转磁盘使磁头定位到目标扇区所需时间</strong>
+<ul>
+<li>设转速为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>r</mi><mtext> </mtext><mi mathvariant="normal">转</mi><mi mathvariant="normal">/</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">r\ 转/s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace"> </span><span class="mord cjk_fallback">转</span><span class="mord">/</span><span class="mord mathdefault">s</span></span></span></span>，则平均延迟时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>R</mi></msub><mo>=</mo><mfrac><mn>1</mn><mi>r</mi></mfrac><mo>⋅</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>r</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">T_R = \frac1r \cdot \frac12 = \frac1{2r}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.00773em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.190108em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.190108em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.190108em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></li>
+</ul>
+</li>
+<li><strong>传输时间</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">T_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：<strong>从磁盘读出或写入数据所经历的时间</strong>
+<ul>
+<li>设转速为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>r</mi><mtext> </mtext><mi mathvariant="normal">转</mi><mi mathvariant="normal">/</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">r\ 转/s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace"> </span><span class="mord cjk_fallback">转</span><span class="mord">/</span><span class="mord mathdefault">s</span></span></span></span>，此次读写字节数为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">b</span></span></span></span>，每个磁道上的字节数为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">N</span></span></span></span>，则传输时间 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>t</mi></msub><mo>=</mo><mfrac><mn>1</mn><mi>r</mi></mfrac><mo>⋅</mo><mfrac><mi>b</mi><mi>n</mi></mfrac><mo>=</mo><mfrac><mi>b</mi><mrow><mi>r</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">T_t=\frac1r\cdot\frac bn=\frac b{rN}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.190108em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.2251079999999999em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.2251079999999999em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span><span class="mord mathdefault mtight" style="margin-right:0.10903em;">N</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></li>
+</ul>
+</li>
+<li><strong>总平均存取时间</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>T</mi><mi>a</mi></msub><mo>=</mo><msub><mi>T</mi><mi>s</mi></msub><mo>+</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>r</mi></mrow></mfrac><mo>+</mo><mfrac><mi>b</mi><mrow><mi>r</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">T_a=T_s+\frac 1{2r}+\frac b{rN}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.190108em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.2251079999999999em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span><span class="mord mathdefault mtight" style="margin-right:0.10903em;">N</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>
+<ul>
+<li>延迟时间和传输时间与磁盘转速<strong>线性相关</strong>，且转速是硬件的<strong>固有属性</strong>，因此这两段时间无法被操作系统优化</li>
+<li><strong>操作系统的磁盘调度算法直接影响寻道时间</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="先来先服务算法fcfs"><a class="markdownIt-Anchor" href="#先来先服务算法fcfs"></a> 先来先服务算法（FCFS）</h3>
+<ul>
+<li>根据进程<strong>请求访问磁盘的先后顺序</strong>进行调度</li>
+<li>优点：公平；访问磁道<strong>集中</strong>时，性能较好</li>
+<li>缺点：访问磁道<strong>分散</strong>时，性能很差，寻道时间长</li>
+</ul>
+<blockquote>
+<p>磁头初始为 100，访问顺序为 55、58、39、18、90、160、150、38、184</p>
+<p>根据 FCFS 规则，磁头共移动了 45+3+19+21+72+70+10+112+146=498 个磁道</p>
+<p>平均移动 498/9=55.3 个磁道 （<strong>平均寻找长度</strong>）</p>
+</blockquote>
+<h3 id="最短寻找时间优先sstf"><a class="markdownIt-Anchor" href="#最短寻找时间优先sstf"></a> 最短寻找时间优先（SSTF）</h3>
+<ul>
+<li>优先处理<strong>与当前磁头位置最近的磁道</strong>，保证每次寻道时间最短，但并不是总的寻道时间最短 （<strong>贪心</strong>）</li>
+<li>优点：性能较好，平均寻道时间短</li>
+<li>缺点：可能<strong>饥饿</strong></li>
+</ul>
+<blockquote>
+<p>同上例，总共移动了 （100-18）+（184-18）=248 个磁道</p>
+<p>平均寻找长度 = 248/9 = 27.5</p>
+</blockquote>
+<h3 id="扫描算法scan"><a class="markdownIt-Anchor" href="#扫描算法scan"></a> 扫描算法（SCAN）</h3>
+<ul>
+<li><strong>只有磁头移动到最外侧磁道时才向内移动</strong>，<strong>只有移动到最内侧磁道时向外移动</strong> （<strong>电梯算法</strong>）</li>
+<li>优点：性能较好，平均寻道时间较短，<strong>不会饥饿</strong></li>
+<li>缺点：读取了当前最边缘的磁道即可转向，<strong>无需移动到最内/外侧</strong>；对各个位置的磁道<strong>响应频率不平均</strong></li>
+</ul>
+<blockquote>
+<p>同上例，且假设正往号数增大的方向移动，号数范围 0~200</p>
+<p>共移动了 （200-100）+（200-18）=282 个磁道</p>
+<p>平均寻找长度 = 282/9 = 31.3</p>
+</blockquote>
+<h3 id="look-调度算法"><a class="markdownIt-Anchor" href="#look-调度算法"></a> LOOK 调度算法</h3>
+<ul>
+<li>改进 SCAN，<strong>在移动方向上没有别的而请求就立即转向</strong></li>
+<li>优点：相对于 SCAN，<strong>寻道时间进一步缩短</strong></li>
+</ul>
+<blockquote>
+<p>共移动了 （184-100）+（184-18）=250 个磁道</p>
+<p>平均寻找长度 = 250/9 = 27.5</p>
+</blockquote>
+<h3 id="循环扫描算法c-scan"><a class="markdownIt-Anchor" href="#循环扫描算法c-scan"></a> 循环扫描算法（C-SCAN）</h3>
+<ul>
+<li>规定<strong>只按特定的一个方向移动</strong>时，才处理请求，<strong>返回时直接快速移动至起始端</strong></li>
+<li>优点：相对于 SCAN，对各个位置磁道的<strong>响应频率平均</strong></li>
+<li>缺点：<strong>多余移动</strong>；平均寻道时间比 SCAN <strong>更长</strong></li>
+</ul>
+<blockquote>
+<p>共移动了 （200-100）+（200-0）+（90-0）=390 个磁道</p>
+<p>平均寻找长度 = 390/9 = 43.3</p>
+</blockquote>
+<h3 id="c-look-调度算法"><a class="markdownIt-Anchor" href="#c-look-调度算法"></a> C-LOOK 调度算法</h3>
+<ul>
+<li>同 LOOK</li>
+<li>优点：相对于 C-SCAN，<strong>寻道时间进一步缩短</strong></li>
+</ul>
+<blockquote>
+<p>共移动了 （184-100）+（184-18）+（90-18）=322 个磁道</p>
+<p>平均寻找长度 = 322/9 = 35.8</p>
+</blockquote>
+<h3 id="小结-2"><a class="markdownIt-Anchor" href="#小结-2"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/Ju6RhEFLI3QXZV8.jpg" alt="磁盘调度算法08小结" /></p>
+<h2 id="磁盘延迟"><a class="markdownIt-Anchor" href="#磁盘延迟"></a> 磁盘延迟</h2>
+<ul>
+<li>磁头读入一个扇区后<strong>需要时间处理</strong>，读几个连续扇区时，<strong>扇区相邻导致磁头因处理数据而错过下一扇区</strong>，造成多余开销</li>
+</ul>
+<h3 id="交替编号"><a class="markdownIt-Anchor" href="#交替编号"></a> 交替编号</h3>
+<ul>
+<li><strong>让逻辑上相邻的扇区在物理上有一定的间隔</strong></li>
+</ul>
+<h3 id="磁盘地址结构设计"><a class="markdownIt-Anchor" href="#磁盘地址结构设计"></a> 磁盘地址结构设计</h3>
+<ul>
+<li>地址结构使用（<strong>柱面号</strong>，<strong>盘面号</strong>，<strong>扇区号</strong>）<strong>是为了处理连续读写时尽量少移动磁头</strong>，减少物理移动耗时</li>
+<li>按连续的二进制数读写，<strong>越高位变化次数越少</strong>，故柱面号在前，<strong>保证连续时磁道变化次数更少</strong></li>
+</ul>
+<blockquote>
+<p>同样读（000，000，000）~（000，011，111）</p>
+<p>若采用（盘面号，<strong>柱面号</strong>，扇区号）需移动磁头 <strong>4</strong> 次</p>
+<p>而采用（<strong>柱面号</strong>，盘面号，扇区号）需移动磁头 <strong>0</strong> 次</p>
+</blockquote>
+<h3 id="错位命名"><a class="markdownIt-Anchor" href="#错位命名"></a> 错位命名</h3>
+<ul>
+<li><strong>上下两个相邻盘面的编号错开</strong>，读完上盘面最后一位后，读下盘面的首位时<strong>跳过磁头处理时间</strong></li>
+</ul>
+<h3 id="小结-3"><a class="markdownIt-Anchor" href="#小结-3"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/u2STFY5PHEB8crW.jpg" alt="磁盘延迟05小结" /></p>
+<h2 id="磁盘管理"><a class="markdownIt-Anchor" href="#磁盘管理"></a> 磁盘管理</h2>
+<h3 id="初始化"><a class="markdownIt-Anchor" href="#初始化"></a> 初始化</h3>
+<ol>
+<li>
+<p><strong>低级格式化</strong>（物理格式化），将磁盘各磁道<strong>划分为扇区</strong></p>
+<ul>
+<li>一个扇区分为<strong>头</strong>、<strong>数据区域</strong>、<strong>尾</strong>三部分</li>
+<li>头尾存放管理扇区的各种数据结构</li>
+</ul>
+</li>
+<li>
+<p>将磁盘分区，<strong>各分区由若干柱面组成</strong></p>
+ <img src="https://i.loli.net/2020/07/02/D76T9nEJXUeSk1s.png" alt="image-20200525183918830" style="zoom:50%;" />
+</li>
+<li>
+<p><strong>逻辑格式化</strong>，创建文件系统，包括创建文件系统根目录、初始化存储空间管理所用的数据结构（位示图、空闲分区表等）</p>
+</li>
+</ol>
+<h3 id="引导块"><a class="markdownIt-Anchor" href="#引导块"></a> 引导块</h3>
+<ul>
+<li><strong>初始化程序</strong>（自举程序）：完成计算机开机时的一系列初始化工作</li>
+<li><strong>ROM</strong>：只读存储器，存放初始化程序，出厂时写入，集成在主板，<strong>不可再修改</strong></li>
+<li>为便于自举程序的修改，ROM 中只存入<strong>小部分</strong>，<strong>完整的</strong>自举程序存放在磁盘的<strong>启动块</strong>（<strong>即引导块</strong>），启动块位于<strong>磁盘固定位置</strong></li>
+<li>拥有启动分区的磁盘成为<strong>启动磁盘</strong>或<strong>系统磁盘</strong></li>
+<li>开机运行<strong>自举装入</strong>程序，找到<strong>引导块</strong>，将<strong>完整的自举程序</strong>读入内存，完成初始化</li>
+</ul>
+<h3 id="坏块"><a class="markdownIt-Anchor" href="#坏块"></a> 坏块</h3>
+<ul>
+<li><strong>已损坏或无法使用的扇区</strong>，属于硬件故障，操作系统无法修复，标记后不再使用</li>
+<li>对于简单的磁盘，在逻辑格式化时对磁盘进行检查，在 <strong>FAT</strong> 标明坏块位置 （<strong>该方式坏块对操作系统可见</strong>）</li>
+<li>对于复杂磁盘，磁盘控制器维护一个<strong>坏块链表</strong>，物理格式化时就进行坏块链的初始化</li>
+<li><strong>扇区备用</strong>：保留部分备用扇区用于替换坏块，<strong>该方式坏块对操作系统不可见</strong></li>
+</ul>
+<h3 id="小结-4"><a class="markdownIt-Anchor" href="#小结-4"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/07/02/MqCmzEc2GRTOIgH.jpg" alt="磁盘管理04小结" /></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%B8%80%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-21-I/O设备与控制">
+      <i class="fa fa-chevron-left"></i> OS-21-I/O设备与控制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-23-设备回收与分配 缓冲区管理">
+      OS-23-设备回收与分配 缓冲区管理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第二十次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第二十次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#磁盘结构"><span class="nav-number">1.1.</span> <span class="nav-text"> 磁盘结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本属性"><span class="nav-number">1.1.1.</span> <span class="nav-text"> 基本属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#物理结构"><span class="nav-number">1.1.2.</span> <span class="nav-text"> 物理结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘分类"><span class="nav-number">1.1.3.</span> <span class="nav-text"> 磁盘分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.1.4.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#磁盘调度算法"><span class="nav-number">1.2.</span> <span class="nav-text"> 磁盘调度算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#读写操作时间"><span class="nav-number">1.2.1.</span> <span class="nav-text"> 读写操作时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#先来先服务算法fcfs"><span class="nav-number">1.2.2.</span> <span class="nav-text"> 先来先服务算法（FCFS）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最短寻找时间优先sstf"><span class="nav-number">1.2.3.</span> <span class="nav-text"> 最短寻找时间优先（SSTF）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扫描算法scan"><span class="nav-number">1.2.4.</span> <span class="nav-text"> 扫描算法（SCAN）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#look-调度算法"><span class="nav-number">1.2.5.</span> <span class="nav-text"> LOOK 调度算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#循环扫描算法c-scan"><span class="nav-number">1.2.6.</span> <span class="nav-text"> 循环扫描算法（C-SCAN）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#c-look-调度算法"><span class="nav-number">1.2.7.</span> <span class="nav-text"> C-LOOK 调度算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">1.2.8.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#磁盘延迟"><span class="nav-number">1.3.</span> <span class="nav-text"> 磁盘延迟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#交替编号"><span class="nav-number">1.3.1.</span> <span class="nav-text"> 交替编号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘地址结构设计"><span class="nav-number">1.3.2.</span> <span class="nav-text"> 磁盘地址结构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错位命名"><span class="nav-number">1.3.3.</span> <span class="nav-text"> 错位命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-3"><span class="nav-number">1.3.4.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#磁盘管理"><span class="nav-number">1.4.</span> <span class="nav-text"> 磁盘管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化"><span class="nav-number">1.4.1.</span> <span class="nav-text"> 初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引导块"><span class="nav-number">1.4.2.</span> <span class="nav-text"> 引导块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#坏块"><span class="nav-number">1.4.3.</span> <span class="nav-text"> 坏块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-4"><span class="nav-number">1.4.4.</span> <span class="nav-text"> 小结</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="[多]生产者-消费者	吸烟者	读者-写者	哲学家进餐">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-10-PV操作典型例题">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="[多]生产者-消费者	吸烟者	读者-写者	哲学家进餐">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/04/04/zWv16iwCBEORcyu.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/04/04/dIuxjslZJ2MztfA.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/04/Kbh82TBGcLpHmjf.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/04/B54cnb6ieDkAWr1.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/04/04/M2TOGKRgJZpNbm6.png">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:21:42.688Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/04/04/zWv16iwCBEORcyu.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-10-PV操作典型例题 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-10-PV操作典型例题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:21:42" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+            <div class="post-description">[多]生产者-消费者	吸烟者	读者-写者	哲学家进餐</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="操作系统第十次课小结"><a class="markdownIt-Anchor" href="#操作系统第十次课小结"></a> 操作系统第十次课小结</h1>
+<hr />
+<h2 id="生产者-消费者问题"><a class="markdownIt-Anchor" href="#生产者-消费者问题"></a> 生产者-消费者问题</h2>
+<h3 id="特征"><a class="markdownIt-Anchor" href="#特征"></a> 特征</h3>
+<ol>
+<li>一组生产者每次生产一个产品放入缓冲区，一组消费者每次从缓冲区取出一个产品</li>
+<li>生产者消费者<strong>共享一个初始为空、大小为N的缓冲区</strong></li>
+<li><strong>同步关系</strong>：只有没满才能放入，只有没空才能取出；满时生产者等待取走消费，空时消费者等待生产放入</li>
+<li><strong>互斥访问</strong>：各进程必须互斥访问<strong>临界资源</strong>缓冲区###</li>
+</ol>
+<h3 id="分析步骤"><a class="markdownIt-Anchor" href="#分析步骤"></a> 分析步骤</h3>
+<ol>
+<li>关系分析，找出线程，明确同步互斥</li>
+<li>确定P、V操作顺序</li>
+<li>设置信号量，根据条件设初值</li>
+<li>互斥先P后V，mutex为1；同步先V后P，初值依题意</li>
+</ol>
+<h3 id="图示"><a class="markdownIt-Anchor" href="#图示"></a> 图示</h3>
+<p><img src="https://i.loli.net/2020/04/04/zWv16iwCBEORcyu.jpg" alt="" /></p>
+<h3 id="伪代码实现"><a class="markdownIt-Anchor" href="#伪代码实现"></a> 伪代码实现</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置信号量</span></span><br><span class="line">semaphore mutex = <span class="number">1</span>;  <span class="comment">// 实现互斥</span></span><br><span class="line">semaphore empty = N;  <span class="comment">// 实现同步 空缓冲区数量</span></span><br><span class="line">semaphore full = <span class="number">0</span>;  <span class="comment">// 实现同步 非空缓冲区数量</span></span><br><span class="line"><span class="comment">// 空缓冲区为0 生产者不再生产</span></span><br><span class="line"><span class="comment">// 非空缓冲区为0 消费者不再消费</span></span><br><span class="line"><span class="comment">// 重点在于 把缓冲区区分为 空和非空 两个概念</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">producer() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 生产一个产品</span></span><br><span class="line">        P(empty);  <span class="comment">// 消耗一个空闲缓冲区  ······· ①</span></span><br><span class="line">        P(mutex);  <span class="comment">// 互斥访问临界区  ······ ②</span></span><br><span class="line">        <span class="comment">// 将产品放入临界区</span></span><br><span class="line">        V(mutex);  <span class="comment">// 临界区解锁</span></span><br><span class="line">        V(full);  <span class="comment">// 增加一个非空缓冲区</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ①②两步不能互换 当空缓冲区为0时 P(mutex)--&gt;P(empty) 会使生产者持有临界区的锁进入阻塞 造成死锁</span></span><br><span class="line"><span class="comment">// 实现互斥的P操作一定要在实现同步的P操作之后</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">consumer() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        P(full);  <span class="comment">// 消耗一个非空  ······ ③</span></span><br><span class="line">        p(mutex);  <span class="comment">// 临界区加锁  ······ ④</span></span><br><span class="line">        <span class="comment">//  取出一个产品</span></span><br><span class="line">        V(mutex);  <span class="comment">// 解锁</span></span><br><span class="line">        V(empty);  <span class="comment">// 增加一个空缓冲区</span></span><br><span class="line">        <span class="comment">// 使用产品</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ③④两步互换同样会造成死锁</span></span><br><span class="line"><span class="comment">// 使用产品的代码 尽量不要放在实现互斥的PV中 以提高处理效率</span></span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="多生产者-消费者问题"><a class="markdownIt-Anchor" href="#多生产者-消费者问题"></a> 多生产者-消费者问题</h2>
+<h3 id="特征-2"><a class="markdownIt-Anchor" href="#特征-2"></a> 特征</h3>
+<ol>
+<li>多类生产者和特定某类消费者</li>
+<li><strong>互斥关系</strong>：对缓冲区（存放产品的临界区）互斥访问</li>
+<li><strong>同步关系</strong>：
+<ul>
+<li>生产者A放入产品a，消费者A才能取出</li>
+<li>生产者B放入产品b，消费者B才能取出</li>
+<li>只有缓存区不满，生产者A、B才能放入</li>
+<li>缓存区不满的事件应由消费者触发</li>
+</ul>
+</li>
+</ol>
+<h3 id="图示-2"><a class="markdownIt-Anchor" href="#图示-2"></a> 图示</h3>
+<p><img src="https://i.loli.net/2020/04/04/dIuxjslZJ2MztfA.png" alt="" /></p>
+<h3 id="伪代码实现-2"><a class="markdownIt-Anchor" href="#伪代码实现-2"></a> 伪代码实现</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">semaphore mutex = <span class="number">1</span>; <span class="comment">// 实现互斥</span></span><br><span class="line">semaphore apple = <span class="number">0</span>, orange = <span class="number">0</span>, plate = <span class="number">1</span>;  <span class="comment">// 实现同步 苹果 橘子 空盘 的数量</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 生产者A 生产apple</span></span><br><span class="line">ProducerA() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 准备一个apple</span></span><br><span class="line">        P(plate);  <span class="comment">// 消耗一个plate 没有空的plate 则阻塞</span></span><br><span class="line">        P(mutex);  <span class="comment">// 实现互斥 加锁</span></span><br><span class="line">        <span class="comment">// apple 放出 plate</span></span><br><span class="line">        V(mutex);  <span class="comment">// 解锁</span></span><br><span class="line">        V(apple);  <span class="comment">// 增加一个apple 提醒消费者A可以进行消费</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生产者B 与A相仿 replace("apple", "orange")</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 消费者A 只消费 apple</span></span><br><span class="line">ConsumerA() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        P(apple);  <span class="comment">// 消费一个apple 没有则阻塞</span></span><br><span class="line">        P(mutex);  <span class="comment">// 加锁</span></span><br><span class="line">        <span class="comment">// 从 plate 取出 apple </span></span><br><span class="line">        V(mutex);  <span class="comment">// 解锁</span></span><br><span class="line">        V(plate);  <span class="comment">// 已取出 故增加一个plate</span></span><br><span class="line">        <span class="comment">// 消费取出的apple</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 消费者B 与A相仿 replace("apple", "orange")</span></span><br></pre></td></tr></table></figure>
+<h3 id="注意事项"><a class="markdownIt-Anchor" href="#注意事项"></a> 注意事项</h3>
+<ol>
+<li>缓冲区（如上例的plate）只有一个的时候，<strong>可能不需要</strong>使用互斥变量mutex，但<strong>不绝对</strong>，视实际再行判断</li>
+<li>从<strong>事件</strong>的角度看问题，把进程行为抽象为事件
+<ul>
+<li>进程行为：缓冲区有产品A（B）⟶ 消费者A（B）取出 ⟶ 生产者A（B）放入</li>
+<li>事件：
+<ul>
+<li><strong>缓冲区变空事件 ⟶ 产品放入事件</strong></li>
+<li><strong>缓冲区变空 ⟶ 消费者A、B判别产品选择性取出</strong></li>
+<li><strong>产品放入 ⟶ 生产者A、B互斥生产</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="吸烟者问题"><a class="markdownIt-Anchor" href="#吸烟者问题"></a> 吸烟者问题</h2>
+<h3 id="特征-3"><a class="markdownIt-Anchor" href="#特征-3"></a> 特征</h3>
+<ol>
+<li>一个供应者每次提供两种原料，三个抽烟者事先持有一种原料 ⟶ <strong>本质上是 生产多种原料组合的单生产者-多种消费者问题</strong></li>
+<li>供应原料放在桌子，抽烟者原料从桌子获取 ⟶ <strong>互斥访问缓冲区缓冲区桌子</strong></li>
+<li>将每次提供的多种原料视为一个组合，问题转化为<strong>生产多种组合的生产者-不同组合需求的消费者</strong></li>
+<li>由抽烟者从桌子取走（或者完成抽烟，视题目而定）激活供应者提供原料</li>
+</ol>
+<h3 id="图示-3"><a class="markdownIt-Anchor" href="#图示-3"></a> 图示</h3>
+<p><img src="https://i.loli.net/2020/04/04/Kbh82TBGcLpHmjf.png" alt="" /></p>
+<h3 id="伪代码实现-3"><a class="markdownIt-Anchor" href="#伪代码实现-3"></a> 伪代码实现</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">semaphore offer1 = <span class="number">0</span>, offer2 = <span class="number">0</span>, offer3 = <span class="number">0</span>;  <span class="comment">// 共三种组合</span></span><br><span class="line">semaphore finish = <span class="number">0</span>;  <span class="comment">// 抽烟是否完成</span></span><br><span class="line"><span class="keyword">int</span> i = <span class="number">0</span>;  <span class="comment">// 实现“轮流”  i = (i + 1) % n</span></span><br><span class="line"><span class="comment">// 这里是以抽烟完成来激活下一次供应 所以 以 finish 来作为同步变量 且 finish 的V操作要放在抽烟之后</span></span><br><span class="line"><span class="comment">// 如果选择以取走原料为激活条件 只需在 P(offer) 之后使用 V(finish)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Privoder() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">0</span>) V(offer1);  <span class="comment">// 循环判断当前轮到哪个抽烟者 并提供相应原料 增加相应组合个数</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">1</span>) V(offer2);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">2</span>) V(offer3);</span><br><span class="line">        i = (i + <span class="number">1</span>) % <span class="number">3</span>;  <span class="comment">// 轮流机制</span></span><br><span class="line">        P(finish);  <span class="comment">// 阻塞 等待抽烟者结束抽烟操作</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Smoker() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        P(offer_n);  <span class="comment">// 消费一个对应组合的原料</span></span><br><span class="line">        <span class="comment">// 抽烟 </span></span><br><span class="line">        V(finish);  <span class="comment">// 抽烟结束 修改同步变量</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="读者-写者问题"><a class="markdownIt-Anchor" href="#读者-写者问题"></a> 读者-写者问题</h2>
+<h3 id="特征-4"><a class="markdownIt-Anchor" href="#特征-4"></a> 特征</h3>
+<ol>
+<li>共享文件只有一个，作为临界区（缓冲区）</li>
+<li>读者与读者可以<strong>同时</strong>阅读文件，并发甚至并行</li>
+<li>读者与写者必须<strong>互斥</strong>访问文件，否则写者写入的信息会覆盖读者阅读的部分</li>
+<li>写者与写者必须<strong>互斥</strong>访问文件，否则写着写入的信息会覆盖另一个写者的写入</li>
+<li><strong>分组，部分同步，部分互斥</strong></li>
+</ol>
+<h3 id="图示-4"><a class="markdownIt-Anchor" href="#图示-4"></a> 图示</h3>
+<p><img src="https://i.loli.net/2020/04/04/B54cnb6ieDkAWr1.jpg" alt="" /></p>
+<h3 id="伪代码实现-4"><a class="markdownIt-Anchor" href="#伪代码实现-4"></a> 伪代码实现</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">semaphore rw = <span class="number">1</span>;  <span class="comment">// 实现读者写者、写者写者的文件互斥访问</span></span><br><span class="line"><span class="keyword">int</span> count = <span class="number">0</span>;  <span class="comment">// 统计读者个数</span></span><br><span class="line">semaphore mutex = <span class="number">1</span>;  <span class="comment">// 实现 count 的互斥访问 count要进行判断和增删操作 要避免并发时出错</span></span><br><span class="line">semaphore w = <span class="number">1</span>;  <span class="comment">// 实现“写优先”的操作 防止源源不断的读者导致写者饥饿 在写者到来时争夺下个读者的P(w)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Writer() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        P(w);  <span class="comment">// 写操作优先 消费这个优先权 下个读者就只能等待归还</span></span><br><span class="line">        P(rw);  <span class="comment">// 实现写文件互斥 加锁</span></span><br><span class="line">        <span class="comment">// 写文件</span></span><br><span class="line">        V(rw);  <span class="comment">// 解锁</span></span><br><span class="line">        V(w);  <span class="comment">// 归还优先权</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Reader() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        P(w);  <span class="comment">// 判断有无写者在操作 有则等待</span></span><br><span class="line">        P(mutex);  <span class="comment">// 实现count互斥 防止第一第二个读者同时操作了P(rw)</span></span><br><span class="line">        <span class="keyword">if</span>(count == <span class="number">0</span>) P(rw);  <span class="comment">// 如果是第一个读者到来 给文件共享区加锁</span></span><br><span class="line">        count++;  <span class="comment">// 读者数量+1</span></span><br><span class="line">        V(mutex);  <span class="comment">// count操作 解锁</span></span><br><span class="line">        V(w);  <span class="comment">// 归回写者优先权</span></span><br><span class="line">        <span class="comment">// 读文件</span></span><br><span class="line">        P(mutex);  <span class="comment">// count 互斥</span></span><br><span class="line">        count--;  <span class="comment">// 读者数量-1</span></span><br><span class="line">        <span class="keyword">if</span>(count == <span class="number">0</span>) V(rw);  <span class="comment">// 如果是最后一个读者 给文件共享区解锁</span></span><br><span class="line">        V(mutex);  <span class="comment">// count操作 解锁</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="注意事项-2"><a class="markdownIt-Anchor" href="#注意事项-2"></a> 注意事项</h3>
+<ol>
+<li>设置 <strong>count 计数器</strong>统计读者数量，实现多个同类进程访问</li>
+<li><strong>写优先的实现过程是</strong>：
+<ul>
+<li>当写者到来时，P(w) 申请写优先权</li>
+<li>当上一个读者V(w)后，写着获取到写优先权，进入下一步P(rw)，申请进入文件共享区</li>
+<li>此时若有其他的读者或写者到来会被阻塞在 P(w) 操作处，所以不会由新增读者进入文件共享区</li>
+<li>当所有在读的读者均阅读完毕退出后，count == 0，V(rw)</li>
+<li>写者通过 P(rw) 开始写文件，写完后退出</li>
+<li>退出时，先归还V(rw)，在归还写优先权V(w)，激活P(w)阻塞的等待队列</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="哲学家进餐问题"><a class="markdownIt-Anchor" href="#哲学家进餐问题"></a> 哲学家进餐问题</h2>
+<h3 id="特征-5"><a class="markdownIt-Anchor" href="#特征-5"></a> 特征</h3>
+<ol>
+<li>五个哲学家五个筷子，则相邻两个哲学家必然不能同时凑齐左右筷子</li>
+<li>若所有人同时选择同一边的筷子，会出现五人都只持有一只筷子而阻塞的情况，陷入死锁</li>
+</ol>
+<h3 id="图示-5"><a class="markdownIt-Anchor" href="#图示-5"></a> 图示</h3>
+<p><img src="https://i.loli.net/2020/04/04/M2TOGKRgJZpNbm6.png" alt="" /></p>
+<h3 id="解决方案"><a class="markdownIt-Anchor" href="#解决方案"></a> 解决方案</h3>
+<ol>
+<li>增加限制条件，同时只能由小于五人争抢筷子进餐，保证至少有一人可以凑齐左右筷子</li>
+<li>奇数位先争夺左边筷子，偶数位先争夺右边筷子，使得相邻两个争抢同一筷子而有一个直接阻塞</li>
+</ol>
+<h3 id="伪代码实现-5"><a class="markdownIt-Anchor" href="#伪代码实现-5"></a> 伪代码实现</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">semaphore chopstick[<span class="number">5</span>] = &#123;<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>&#125;;  <span class="comment">// 互斥变量筷子</span></span><br><span class="line">semaphore mutex = <span class="number">1</span>;  <span class="comment">// 互斥的取筷子</span></span><br><span class="line">Person_i() &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        P(mutex);  <span class="comment">// 互斥 每次只允许一个人尝试取筷子</span></span><br><span class="line">        P(chopstick[i]);  <span class="comment">// 先取左边</span></span><br><span class="line">        P(chopstick[(i + <span class="number">1</span>) % <span class="number">5</span>]);  <span class="comment">// 取右边</span></span><br><span class="line">        V(mutex);  <span class="comment">// 解锁 下一个人取筷子</span></span><br><span class="line">        <span class="comment">// 进餐</span></span><br><span class="line">        V(chopstick[i]);  <span class="comment">// 归还筷子</span></span><br><span class="line">        V(chopstick[(i + <span class="number">1</span>) % <span class="number">5</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-16-分段、段页式内存管理 以及 虚拟内存技术">
+      <i class="fa fa-chevron-left"></i> OS-16-分段、段页式内存管理 以及 虚拟内存技术
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AB%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-18-文件概述">
+      OS-18-文件概述 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第十次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第十次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#生产者-消费者问题"><span class="nav-number">1.1.</span> <span class="nav-text"> 生产者-消费者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#特征"><span class="nav-number">1.1.1.</span> <span class="nav-text"> 特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析步骤"><span class="nav-number">1.1.2.</span> <span class="nav-text"> 分析步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图示"><span class="nav-number">1.1.3.</span> <span class="nav-text"> 图示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码实现"><span class="nav-number">1.1.4.</span> <span class="nav-text"> 伪代码实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多生产者-消费者问题"><span class="nav-number">1.2.</span> <span class="nav-text"> 多生产者-消费者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#特征-2"><span class="nav-number">1.2.1.</span> <span class="nav-text"> 特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图示-2"><span class="nav-number">1.2.2.</span> <span class="nav-text"> 图示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码实现-2"><span class="nav-number">1.2.3.</span> <span class="nav-text"> 伪代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项"><span class="nav-number">1.2.4.</span> <span class="nav-text"> 注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#吸烟者问题"><span class="nav-number">1.3.</span> <span class="nav-text"> 吸烟者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#特征-3"><span class="nav-number">1.3.1.</span> <span class="nav-text"> 特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图示-3"><span class="nav-number">1.3.2.</span> <span class="nav-text"> 图示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码实现-3"><span class="nav-number">1.3.3.</span> <span class="nav-text"> 伪代码实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读者-写者问题"><span class="nav-number">1.4.</span> <span class="nav-text"> 读者-写者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#特征-4"><span class="nav-number">1.4.1.</span> <span class="nav-text"> 特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图示-4"><span class="nav-number">1.4.2.</span> <span class="nav-text"> 图示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码实现-4"><span class="nav-number">1.4.3.</span> <span class="nav-text"> 伪代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项-2"><span class="nav-number">1.4.4.</span> <span class="nav-text"> 注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哲学家进餐问题"><span class="nav-number">1.5.</span> <span class="nav-text"> 哲学家进餐问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#特征-5"><span class="nav-number">1.5.1.</span> <span class="nav-text"> 特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图示-5"><span class="nav-number">1.5.2.</span> <span class="nav-text"> 图示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-number">1.5.3.</span> <span class="nav-text"> 解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码实现-5"><span class="nav-number">1.5.4.</span> <span class="nav-text"> 伪代码实现</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

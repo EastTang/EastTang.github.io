@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="单一连续&#x2F;固定分区&#x2F;动态分区分配	首次&#x2F;最佳&#x2F;最坏&#x2F;临近适应算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-14-内存分配方式与算法">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="单一连续&#x2F;固定分区&#x2F;动态分区分配	首次&#x2F;最佳&#x2F;最坏&#x2F;临近适应算法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/04/24/yHAer1SunDFPJId.jpg">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:47:21.602Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/04/24/yHAer1SunDFPJId.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-14-内存分配方式与算法 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-14-内存分配方式与算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:21" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%9B%9B%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">单一连续/固定分区/动态分区分配	首次/最佳/最坏/临近适应算法</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#%E5%8D%95%E4%B8%80%E8%BF%9E%E7%BB%AD%E5%88%86%E9%85%8D">单一连续分配</a></li>
+<li><a href="#%E5%9B%BA%E5%AE%9A%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D">固定分区分配</a></li>
+<li><a href="#%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D">动态分区分配</a></li>
+<li><a href="#%E7%A2%8E%E7%89%87">碎片</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+<li><a href="#%E9%A6%96%E6%AC%A1%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95">首次适应算法</a></li>
+<li><a href="#%E6%9C%80%E4%BD%B3%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95">最佳适应算法</a></li>
+<li><a href="#%E6%9C%80%E5%9D%8F%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95">最坏适应算法</a></li>
+<li><a href="#%E9%82%BB%E8%BF%91%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95">邻近适应算法</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-2">小结</a></li>
+</ul>
+</p>
+<h1 id="操作系统第十四次课小结"><a class="markdownIt-Anchor" href="#操作系统第十四次课小结"></a> 操作系统第十四次课小结</h1>
+<h2 id="单一连续分配"><a class="markdownIt-Anchor" href="#单一连续分配"></a> 单一连续分配</h2>
+<ol>
+<li>分区（<strong>两个</strong>）
+<ul>
+<li><strong>系统区</strong>：通常位于<strong>低地址</strong>，存放操作系统相关数据</li>
+<li><strong>用户区</strong>：<strong>高地址</strong>，用户进程相关数据</li>
+</ul>
+</li>
+<li>内存中<strong>只</strong>能有<strong>一道用户程序</strong>，独占用户区，所以常有一部分内存区<strong>未得到利用</strong></li>
+<li>优点：实现简单，<strong>无外部碎片</strong>；可采用覆盖技术扩充内存；不一定需要内存保护</li>
+<li>缺点：只适用单用户单任务的操作系统；<strong>有内部碎片</strong>；存储利用率极低</li>
+</ol>
+<h2 id="固定分区分配"><a class="markdownIt-Anchor" href="#固定分区分配"></a> 固定分区分配</h2>
+<ol>
+<li>
+<p>分区（<strong>多个</strong>）</p>
+<ul>
+<li>
+<p>同样有系统区和用户区</p>
+</li>
+<li>
+<p>用户区划分出<strong>若干分区</strong>，<strong>每个分区之只装入一道作业</strong>，同时运行</p>
+</li>
+<li>
+<p>若干分区<strong>大小相等</strong>：不灵活，适用于一台计算机<strong>控制多个相同对象</strong>的场合</p>
+<blockquote>
+<p>钢铁厂 n 个相同的炼钢炉，</p>
+<p>把内存分为 n 个大小相等的区域，</p>
+<p>存放 n 个炼钢炉控制程序</p>
+</blockquote>
+</li>
+<li>
+<p>若干分区<strong>大小不等</strong>：灵活，满足<strong>不同大小进程</strong>的需求</p>
+<blockquote>
+<p>根据系统中运行作业大小的规律来划分，</p>
+<p>如 划分多个小分区、适量中分区、少量大分区</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>分区说明表</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">分区号</th>
+<th style="text-align:center">大小（MB）</th>
+<th style="text-align:center">起始地址（M）</th>
+<th style="text-align:center">状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">未分配</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">6</td>
+<td style="text-align:center">14</td>
+<td style="text-align:center">未分配</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">20</td>
+<td style="text-align:center">已分配</td>
+</tr>
+<tr>
+<td style="text-align:center">······</td>
+<td style="text-align:center">······</td>
+<td style="text-align:center">······</td>
+<td style="text-align:center">······</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>装入内存时，操作系统选择一块大小合适的分区分配出去，并修改其状态为 “已分配”</li>
+</ul>
+</li>
+<li>
+<p>优点：实现简单，<strong>无外部碎片</strong></p>
+</li>
+<li>
+<p>缺点：</p>
+<ul>
+<li>程序过大，现有分区无法满足，需要使用<strong>覆盖技术</strong>，但会<strong>降低性能</strong></li>
+<li><strong>产生内部碎片</strong>，内存里利用率低</li>
+</ul>
+</li>
+</ol>
+<h2 id="动态分区分配"><a class="markdownIt-Anchor" href="#动态分区分配"></a> 动态分区分配</h2>
+<ol>
+<li>
+<p>分区（<strong>初始仅系统区</strong>）</p>
+<ul>
+<li>用户区<strong>不会预先</strong>划分内存分区</li>
+<li>根据装入进程的大小<strong>动态建立</strong>分区，分区大小<strong>正好满足</strong>进程需要</li>
+<li>分区的大小和数目都<strong>是按需变化的</strong></li>
+</ul>
+</li>
+<li>
+<p>数据结构</p>
+<ul>
+<li>
+<p><strong>空闲分区表</strong>：每个空闲分区对应一个表项，内容包含<strong>区号、分区大小、起始地址</strong>等；各表项顺序不一定按地址递增，<strong>视分配算法而定</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">区号</th>
+<th style="text-align:center">分区大小</th>
+<th style="text-align:center">起始地址</th>
+<th style="text-align:center">···</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">20MB</td>
+<td style="text-align:center">8M</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">10MB</td>
+<td style="text-align:center">30M</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">3MB</td>
+<td style="text-align:center">60M</td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>空闲分区链</strong>：<strong>双向链表结构</strong>，每个<strong>分区</strong>的起始和末尾分别设置<strong>前向后向指针</strong>，起始部分还可记录<strong>分区大小等信息</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>分配规则</p>
+<ul>
+<li>
+<p>新作业装入时，若有多个分隔开的分区，选择哪一块作为空闲分区被装入，需要按照一定的<strong>动态分区分配算法</strong></p>
+<blockquote>
+<p>优先使用大分区还是小分区，或者使地址低位的还是高位的？</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>
+<p>分区的分配和回收</p>
+<blockquote>
+<p>假设先第 2 块分区装入一块大小为 m 的进程空间，<br />
+3号分区收回一块大小为 n 的进程空间，<br />
+如何计算和记录</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>使用空闲分区表</strong></p>
+<p>| （装入前）分区号 | 分区大小 | 起始地址 |<br />
+| :--------------: | :------: | :------: |<br />
+|        1         |    20    |    8     |<br />
+|        2         |    10    |    32    |<br />
+|        3         |    4     |    60    |</p>
+<p>| （装入后）分区号 | 分区大小 | 起始地址 |<br />
+| :--------------: | :------: | :------: |<br />
+|        1         |    20    |    8     |<br />
+|        2         |  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>10</mn><mo>−</mo><mi>m</mi></mrow><annotation encoding="application/x-tex">10-m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">m</span></span></span></span>  |  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>32</mn><mo>+</mo><mi>m</mi></mrow><annotation encoding="application/x-tex">32+m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">3</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">m</span></span></span></span>  |<br />
+|        3         |  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>4</mn><mo>+</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">4+n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span>   |  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>60</mn><mo>+</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">60+n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">6</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span>  |</p>
+<p>若恰好<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>m</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">m=10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">0</span></span></span></span>，则能装满分区，可直接删去二号分区这一表项</p>
+<p>若收回的空间是一整块分区，则直接增加一个表项，起始地址是进程分区的归还地址，大小是归还大小，<strong>而后考虑是否相邻合并</strong></p>
+</li>
+<li>
+<p><strong>使用空闲分区链</strong></p>
+</li>
+<li>
+<p>可直接在链表节点的<strong>分区大小变量</strong> <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>+</mo><mi>m</mi><mi mathvariant="normal">/</mi><mo>−</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">+m/-n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">+</span><span class="mord mathdefault">m</span><span class="mord">/</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span>，更新分区大小</p>
+<ul>
+<li>同理，若装入空间正好填满空闲分区，<strong>直接移除</strong>该节点即可</li>
+</ul>
+</li>
+<li>
+<p>若收回的空间是一整块分区，则直接增加一个结点，大小是归还大小，<strong>而后考虑是否相邻合并</strong></p>
+<ul>
+<li>链表<strong>节点顺序</strong>即反映分区排列顺序</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>回收时如何<strong>判断是否相邻合并</strong></p>
+</blockquote>
+<ul>
+<li>
+<p>回收时除了<strong>更新</strong>分区的大小记录<strong>变量</strong>，还要考虑新分区回归是否导致与其它<strong>空闲分区相邻</strong></p>
+</li>
+<li>
+<p><strong>判断方式</strong></p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> 起始地址-归还分区大小 == 上个分区大小+上个分区起始地址  <span class="comment"># 情况一：向上合并</span></span><br></pre></td></tr></table></figure>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> 归还起始地址+归还分区大小 == 下个分区起始地址  <span class="comment"># 情况二：整个分区归还 向下合并</span></span><br></pre></td></tr></table></figure>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> 情况一 &amp;&amp; 情况二  <span class="comment"># 情况三：上下合并</span></span><br><span class="line"><span class="keyword">if</span> !情况三  <span class="comment"># 情况四： 不合并</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="碎片"><a class="markdownIt-Anchor" href="#碎片"></a> 碎片</h2>
+<ol>
+<li><strong>内部碎片</strong>：<strong>已分配</strong>给进程，但部分<strong>没用上</strong></li>
+<li><strong>外部碎片</strong>：内存中某些空闲分区由于<strong>太小而无法被分配</strong>出去</li>
+<li><strong>紧凑技术</strong>：整合若干分离的<strong>非空闲</strong>分区为<strong>连续排列</strong>，使外部碎片组合成新的整体分区，需要<strong>动态重定位</strong></li>
+</ol>
+<h2 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h2>
+<p><img src="https://i.loli.net/2020/04/24/yHAer1SunDFPJId.jpg" alt="" /></p>
+<h2 id="首次适应算法"><a class="markdownIt-Anchor" href="#首次适应算法"></a> 首次适应算法</h2>
+<ul>
+<li>从<strong>起始地址</strong>（<strong>低地址</strong>）开始查找，使用<strong>第一个</strong>能满足需求的空闲分区</li>
+<li>空闲分区以<strong>地址递增</strong>的次序排列，每次分配时<strong>顺序</strong>查找空闲分区表（链），适配<strong>第一个</strong>满足需求的分区，<strong>不论是否最合适</strong>，并扣减分区，注意<strong>满则删除</strong>表项（节点）</li>
+</ul>
+<h2 id="最佳适应算法"><a class="markdownIt-Anchor" href="#最佳适应算法"></a> 最佳适应算法</h2>
+<ul>
+<li>通过连续分配方式获得的进程空间必是<strong>连续</strong>，为<strong>保证大进程的空间需求</strong>，<strong>优先使用较小分区</strong></li>
+<li>空闲分区按<strong>容量递增</strong>顺序排列，每次分配时<strong>顺序</strong>查找空闲分区表（链），适配<strong>第一个</strong>满足需求的分区</li>
+<li>每次分配完要<strong>重排</strong>，防止扣减后的分区不满足递增顺序</li>
+<li><strong>缺点</strong>：优先小分区若<strong>不能恰好分配满</strong>，会留下更多<strong>极小</strong>分区<strong>难以利用</strong>，会产生<strong>很多外部碎片</strong>，</li>
+<li>适用于<strong>大作业较多</strong>的场景</li>
+</ul>
+<h2 id="最坏适应算法"><a class="markdownIt-Anchor" href="#最坏适应算法"></a> 最坏适应算法</h2>
+<ul>
+<li>
+<p>为解决上步算法留下过多外部碎片的问题，<strong>优先分配大分区</strong></p>
+</li>
+<li>
+<p>空闲分区按<strong>容量递减</strong>顺序排列，每次分配时<strong>只需比较首个</strong>分区</p>
+<p>首项肯定最大，若不满足，则后续更不满足；若满足直接划分相应空间进行分配</p>
+</li>
+<li>
+<p>每次分配完检查<strong>首项是否大于第二项</strong>，是则不做处理，<strong>否则重排</strong></p>
+</li>
+<li>
+<p><strong>缺点</strong>：<strong>大进程不友好</strong>，优先分配大分区使得进程越大越不容易满足</p>
+</li>
+<li>
+<p>适用于<strong>小作业较多</strong>的环境</p>
+</li>
+</ul>
+<h2 id="邻近适应算法"><a class="markdownIt-Anchor" href="#邻近适应算法"></a> 邻近适应算法</h2>
+<ul>
+<li>首次适应算法每次都从头开始查找分配，导致<strong>前半部过小分区较多</strong>，多次查找<strong>增加开销</strong>，因此考虑<strong>每次查找从上次结束位置开始</strong></li>
+<li>空闲分区以<strong>地址递增</strong>的顺序排列（排成<strong>循环链表</strong>），每次从<strong>上次结束位置</strong>开始<strong>查找第一个</strong>能满足需求的空闲分区</li>
+<li><strong>缺点</strong>：<strong>高低地址等概率被分配</strong>，可能导致无大分区可用</li>
+</ul>
+<h2 id="小结-2"><a class="markdownIt-Anchor" href="#小结-2"></a> 小结</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">算法</th>
+<th style="text-align:center">思想</th>
+<th style="text-align:center">分区排列</th>
+<th style="text-align:center">优点</th>
+<th style="text-align:center">缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">首次适应</td>
+<td style="text-align:center"><strong>从头到尾首个适配</strong></td>
+<td style="text-align:center">地址递增</td>
+<td style="text-align:center">性能最好，<br /><strong>算法开销小</strong>，<br />无需重排</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">最佳适应</td>
+<td style="text-align:center"><strong>优先分配小分区</strong>，<br />保留大分区</td>
+<td style="text-align:center">容量递增</td>
+<td style="text-align:center"><strong>对大进程友好</strong></td>
+<td style="text-align:center">产生很多<strong>外部碎片</strong>，<br /><strong>算法开销大</strong>，<br />需要重排</td>
+</tr>
+<tr>
+<td style="text-align:center">最坏适应</td>
+<td style="text-align:center"><strong>优先分配大分区</strong>，<br />防止过多小碎片</td>
+<td style="text-align:center">容量递减</td>
+<td style="text-align:center"><strong>减少过小的外部碎片</strong></td>
+<td style="text-align:center"><strong>大进程不友好</strong>，<br /><strong>算法开销大</strong>，<br />需重排</td>
+</tr>
+<tr>
+<td style="text-align:center">邻近适应</td>
+<td style="text-align:center"><strong>每次从上次结束位置开始查找首个适配</strong></td>
+<td style="text-align:center">地址递增<br /><strong>循环链表</strong></td>
+<td style="text-align:center">高低地址等概率分配，<br /><strong>算法开销小</strong></td>
+<td style="text-align:center">高地址的大分区也被用完，<strong>大进程不友好</strong></td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E5%85%AB%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-18-文件概述">
+      <i class="fa fa-chevron-left"></i> OS-18-文件概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B9%9D%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-19-文件空间分配和存储">
+      OS-19-文件空间分配和存储 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第十四次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第十四次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#单一连续分配"><span class="nav-number">1.1.</span> <span class="nav-text"> 单一连续分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#固定分区分配"><span class="nav-number">1.2.</span> <span class="nav-text"> 固定分区分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态分区分配"><span class="nav-number">1.3.</span> <span class="nav-text"> 动态分区分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#碎片"><span class="nav-number">1.4.</span> <span class="nav-text"> 碎片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">1.5.</span> <span class="nav-text"> 小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#首次适应算法"><span class="nav-number">1.6.</span> <span class="nav-text"> 首次适应算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最佳适应算法"><span class="nav-number">1.7.</span> <span class="nav-text"> 最佳适应算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最坏适应算法"><span class="nav-number">1.8.</span> <span class="nav-text"> 最坏适应算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#邻近适应算法"><span class="nav-number">1.9.</span> <span class="nav-text"> 邻近适应算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结-2"><span class="nav-number">1.10.</span> <span class="nav-text"> 小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

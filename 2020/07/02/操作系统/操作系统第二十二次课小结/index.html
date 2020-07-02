@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="I&#x2F;O软件层次	I&#x2F;O核心子系统	假脱机技术（SPooling）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-22-I&#x2F;O软件">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="I&#x2F;O软件层次	I&#x2F;O核心子系统	假脱机技术（SPooling）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/vrHNeAIGSXpwK8d.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/1cLxY6Qmjs38Z9O.png">
+<meta property="og:image" content="https://i.loli.net/2020/07/02/wHtaS9RNvJ4G13m.jpg">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:47:49.001Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/07/02/vrHNeAIGSXpwK8d.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-22-I/O软件 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-22-I/O软件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:49" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">I/O软件层次	I/O核心子系统	假脱机技术（SPooling）</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#io-%E8%BD%AF%E4%BB%B6%E5%B1%82%E6%AC%A1">I/O 软件层次</a>
+<ul>
+<li><a href="#%E7%94%A8%E6%88%B7%E5%B1%82%E8%BD%AF%E4%BB%B6">用户层软件</a></li>
+<li><a href="#%E8%AE%BE%E5%A4%87%E7%8B%AC%E7%AB%8B%E6%80%A7%E8%BD%AF%E4%BB%B6">设备独立性软件</a></li>
+<li><a href="#%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F">设备驱动程序</a></li>
+<li><a href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F">中断处理程序</a></li>
+<li><a href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">注意事项</a></li>
+</ul>
+</li>
+<li><a href="#io-%E6%A0%B8%E5%BF%83%E5%AD%90%E7%B3%BB%E7%BB%9F">I/O 核心子系统</a>
+<ul>
+<li><a href="#io-%E8%B0%83%E5%BA%A6">I/O 调度</a></li>
+<li><a href="#%E8%AE%BE%E5%A4%87%E4%BF%9D%E6%8A%A4">设备保护</a></li>
+<li><a href="#%E5%81%87%E8%84%B1%E6%9C%BA%E6%8A%80%E6%9C%AF">假脱机技术</a>
+<ul>
+<li><a href="#%E8%84%B1%E6%9C%BA%E6%8A%80%E6%9C%AF">脱机技术</a></li>
+<li><a href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BA%95">输入/输出井</a></li>
+<li><a href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E8%BF%9B%E7%A8%8B">输入/输出进程</a></li>
+<li><a href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%BC%93%E5%86%B2%E5%8C%BA">输入/输出缓冲区</a></li>
+<li><a href="#%E5%85%B1%E4%BA%AB%E6%89%93%E5%8D%B0%E6%9C%BA">共享打印机</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="操作系统第二十二次课小结"><a class="markdownIt-Anchor" href="#操作系统第二十二次课小结"></a> 操作系统第二十二次课小结</h1>
+<h2 id="io-软件层次"><a class="markdownIt-Anchor" href="#io-软件层次"></a> I/O 软件层次</h2>
+<ul>
+<li>越上层越接近用户，越下层越接近硬件</li>
+<li>每层<strong>利用其下层提供的服务</strong>实现某些功能，屏蔽实现的具体细节，<strong>向高层提供服务</strong>（封装）</li>
+<li>I/O <strong>核心子系统</strong>：设备独立性软件、设备驱动程序、中断处理程序，属于操作系统<strong>内核</strong>部分</li>
+</ul>
+<h3 id="用户层软件"><a class="markdownIt-Anchor" href="#用户层软件"></a> 用户层软件</h3>
+<ul>
+<li>
+<p><strong>向上实现了与用户交互的接口</strong>，用户使用相关<strong>库函数</strong>对设备进行操作<br />
+<strong>向下</strong>将<strong>用户请求翻译</strong>为格式化的 I/O 请求，通过<strong>系统调用</strong>请求操作系统内核的服务</p>
+<blockquote>
+<p>Eg: 用户使用函数 <code>printf(&quot;hello, world!&quot;)</code> 会被翻译为等价的 <code>write</code> 系统调用</p>
+</blockquote>
+</li>
+<li>
+<p>Windows API：Win 系统向外提供的一系列系统调用格式<strong>过于严格</strong>，因此封装为更便利的<strong>库函数接口</strong>供用户使用</p>
+</li>
+</ul>
+<h3 id="设备独立性软件"><a class="markdownIt-Anchor" href="#设备独立性软件"></a> 设备独立性软件</h3>
+<ul>
+<li>
+<p>又称<strong>设备无关性软件</strong>，实现<strong>大部分</strong>与硬件特性<strong>无关</strong>的功能</p>
+</li>
+<li>
+<p>实现的功能：</p>
+<ol>
+<li><strong>向上提供统一的系统调用接口</strong>，如 read/write 系统调用</li>
+<li>设备的<strong>保护</strong>，视设备为特殊<strong>文件</strong>，不同用户对其的<strong>访问权限不同</strong></li>
+<li><strong>差错处理</strong>，对设备的一些错误继续处理</li>
+<li>设备的<strong>分配与回收</strong></li>
+<li><strong>数据缓冲区管理</strong>，通过缓冲技术屏蔽设备间数据交换单位大小和输出速度的差距</li>
+<li>建立逻辑名到物理设备名的<strong>映射关系</strong>，<strong>根据设备类型选择</strong>调用响应的驱动程序<br />
+用户或用户层软件发出 I/O 操作相关系统调用时，需<strong>指明</strong>此次要操作的 I/O <strong>逻辑设备名</strong><br />
+需要通过<strong>逻辑设备表</strong>（LUT）确定逻辑名对应的<strong>物理设备</strong>，并找到设备对应的<strong>设备驱动程序</strong></li>
+</ol>
+</li>
+<li>
+<p><strong>逻辑设备表</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">逻辑设备名</th>
+<th style="text-align:center">物理设备名</th>
+<th style="text-align:center">驱动程序入口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">/dev/打印机1</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">1024</td>
+</tr>
+<tr>
+<td style="text-align:center">/dev/打印机2</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">2048</td>
+</tr>
+<tr>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+<td style="text-align:center">···</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>I/O 设备视为一种<strong>特殊文件</strong>，且不同类型的设备需要<strong>不同的驱动程序</strong>，采用<strong>逻辑设备表</strong>（LUT）</p>
+<ol>
+<li>整个系统<strong>只需一张</strong> LUT，仅适合<strong>单用户</strong>操作系统</li>
+<li><strong>为每个用户设置一张</strong> LUT，各用户使用的逻辑设备名可重复，适用于<strong>多用户</strong>，系统在用户登录时为其建立一个<strong>用户管理进程</strong>，LUT 存放于其 <strong>PCB</strong> 中</li>
+</ol>
+</li>
+</ul>
+<h3 id="设备驱动程序"><a class="markdownIt-Anchor" href="#设备驱动程序"></a> 设备驱动程序</h3>
+<ul>
+<li>不同设备内部<strong>硬件特性不同</strong>，由厂家提供与设备相对应的<strong>驱动程序</strong>，CPU<strong>执行驱动程序的指令序列</strong>，来完成<strong>设置设备寄存器</strong>、<strong>检查设备状态</strong>等工作</li>
+<li>主要负责<strong>对硬件设备的具体控制</strong>，将上层命令转化为<strong>特定设备能处理</strong>的一系列操作</li>
+<li><strong>驱动程序入口地址</strong>存放于<strong>逻辑设备表</strong>，随用户登录<strong>常驻内存</strong>；<strong>驱动程序</strong>一般以一个<strong>独立进程</strong>的方式存在，</li>
+<li>厂家根据设备的硬件特性设计并提供相应的驱动程序</li>
+</ul>
+<h3 id="中断处理程序"><a class="markdownIt-Anchor" href="#中断处理程序"></a> 中断处理程序</h3>
+<ul>
+<li>
+<p>I/O 任务完成时，I/O 控制器会发送一个<strong>中断信号</strong>，系统根据<strong>中断信号类型</strong>找到相应的<strong>中断处理程序</strong>并执行</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">op1&#x3D;&gt;operation: 从控制器读出设备状态</span><br><span class="line">op2&#x3D;&gt;operation: 从设备中读入一个字的数据</span><br><span class="line">				并经由CPU放到内存缓冲区中</span><br><span class="line">				(此处说明中断程序也与硬件交流)</span><br><span class="line">op3&#x3D;&gt;operation: 根据异常原因做出相应处理</span><br><span class="line">cond&#x3D;&gt;condition: I&#x2F;O正常结束</span><br><span class="line">op1-&gt;cond</span><br><span class="line">cond(yes)-&gt;op2</span><br><span class="line">cond(no)-&gt;op3</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="注意事项"><a class="markdownIt-Anchor" href="#注意事项"></a> 注意事项</h3>
+<ul>
+<li>理解并记住 I/O 软件<strong>各层次之间的顺序</strong>，判断某个处理应该是<strong>在哪个层次完成</strong>的（常考设备独立性软件、设备驱动程序）</li>
+<li>直接<strong>涉及到硬件具体细节</strong>、且<strong>与中断无关</strong>的操作必由<strong>设备驱动层</strong>完成；<strong>没有涉及硬件</strong>、对<strong>各种设备都要进行</strong>的管理工作都是在<strong>设备独立性软件</strong>完成的</li>
+</ul>
+<h2 id="io-核心子系统"><a class="markdownIt-Anchor" href="#io-核心子系统"></a> I/O 核心子系统</h2>
+<ul>
+<li>包含设备独立性软件、设备驱动程序、中断处理程序，属于操作系统<strong>内核</strong>部分</li>
+<li>重点理解 I/O 调度、设备保护、假脱机技术、设备的分配与回收、缓冲区管理，均位于设备独立性软件层次中</li>
+</ul>
+<h3 id="io-调度"><a class="markdownIt-Anchor" href="#io-调度"></a> I/O 调度</h3>
+<ul>
+<li>用某种<strong>算法确定</strong>一个好的<strong>顺序</strong>来处理各个 I/O 请求</li>
+<li>打印机等也可以使用 FIFO、优先级算法、短作业优先等来确定调度顺序</li>
+</ul>
+<h3 id="设备保护"><a class="markdownIt-Anchor" href="#设备保护"></a> 设备保护</h3>
+<ul>
+<li>实现<strong>文件保护功能</strong>，不同的用户对各个文件有不同的访问权限（r/w/rw）</li>
+<li>UNIX 中，设备视为一种文件，有相应的 FCB，进行用户访问权限控制</li>
+</ul>
+<h3 id="假脱机技术"><a class="markdownIt-Anchor" href="#假脱机技术"></a> 假脱机技术</h3>
+<ul>
+<li>又称<strong>SPOOLing</strong>技术，用软件模拟脱机</li>
+</ul>
+<h4 id="脱机技术"><a class="markdownIt-Anchor" href="#脱机技术"></a> 脱机技术</h4>
+<ul>
+<li>
+<p><strong>脱机</strong>：脱离主机的控制进行的输入输出操作</p>
+</li>
+<li>
+<p>批处理阶段引入的，用磁带完成，缓解 CPU 与慢速 I/O 设备的<strong>速度矛盾</strong>，CPU 忙碌时也可以提前将数据<strong>输入</strong>到磁带；慢速<strong>输出</strong>设备忙碌时也可以将数据输出到磁带</p>
+</li>
+<li>
+<p><strong>外围控制机</strong>：控制慢速 I/O 设备和磁带之间的数据传递</p>
+</li>
+<li>
+<p><strong>流程</strong></p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">op1&#x3D;&gt;operation: 慢速 I 设备</span><br><span class="line">op2&#x3D;&gt;operation: 外围控制机（输入）</span><br><span class="line">op3&#x3D;&gt;operation: 磁带（输入）</span><br><span class="line">op4&#x3D;&gt;operation: CPU</span><br><span class="line">op5&#x3D;&gt;operation: 磁带（输出）</span><br><span class="line">op6&#x3D;&gt;operation: 外围控制机（输出）</span><br><span class="line">op7&#x3D;&gt;operation: 慢速 O 设备</span><br><span class="line">op1(right)-&gt;op2(right)-&gt;op3-&gt;op4-&gt;op5</span><br><span class="line">op5(right)-&gt;op6(right)-&gt;op7</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="输入输出井"><a class="markdownIt-Anchor" href="#输入输出井"></a> 输入/输出井</h4>
+<ul>
+<li>模拟脱机输入/输出时的<strong>磁带</strong>，收容 I/O 设备输入 或 输出到设备 的数据</li>
+<li><strong>磁盘</strong>开辟出的两个存储区域</li>
+</ul>
+<h4 id="输入输出进程"><a class="markdownIt-Anchor" href="#输入输出进程"></a> 输入/输出进程</h4>
+<ul>
+<li>模拟<strong>外围控制机</strong></li>
+<li>可见，假脱机技术的实现需要<strong>多道进程</strong>参与支持</li>
+</ul>
+<h4 id="输入输出缓冲区"><a class="markdownIt-Anchor" href="#输入输出缓冲区"></a> 输入/输出缓冲区</h4>
+<ul>
+<li>设在<strong>内存</strong>中的缓冲区</li>
+<li>输入进程控制下，输入缓冲区<strong>暂存</strong>从设备输入的数据，再转存到输入井<br />
+输出进程控制下，输出缓冲区暂存从输出井送来的数据，再送到输出设备</li>
+</ul>
+<p><img src="https://i.loli.net/2020/07/02/vrHNeAIGSXpwK8d.png" alt="image-20200605102834615" /></p>
+<h4 id="共享打印机"><a class="markdownIt-Anchor" href="#共享打印机"></a> 共享打印机</h4>
+<ul>
+<li>
+<p><strong>独占式</strong>设备：只允许各进程<strong>串行</strong>使用，一段时间内<strong>只满足一个进程</strong>的请求<br />
+<strong>共享</strong>设备：允许多个进程<strong>并发</strong>使用，<strong>同时满足多个进程</strong>的使用请求</p>
+</li>
+<li>
+<p>打印机是独占式设备。进程A使用时，进程B的请求必然阻塞。使用假脱机技术可改造为共享设备</p>
+<ol>
+<li>系统<strong>接收多个</strong>打印请求，但并不直接分配</li>
+<li><strong>假脱机管理进程</strong>在<strong>磁盘输出井</strong>中为进程申请一个<strong>空闲缓冲区</strong>，存放入要打印的数据</li>
+<li>管理进程为用户进程<strong>建立申请表</strong>，<strong>记录打印请求</strong>（<strong>数据存放位置等</strong>），挂到<strong>假脱机文件队列</strong>末尾</li>
+<li>当打印机空闲时，<strong>输出进程</strong>从队头<strong>取出</strong>一个申请表，按要求将所需<strong>数据从输出井中传送到输出缓冲区</strong>，<strong>再输出到打印机</strong>进行打印</li>
+<li>依次完成队列中全部任务</li>
+</ol>
+<p><img src="https://i.loli.net/2020/07/02/1cLxY6Qmjs38Z9O.png" alt="image-20200605102751826" /></p>
+</li>
+<li>
+<p>由此假脱机技术把一台物理设备<strong>虚拟</strong>成逻辑上的多台设备，独占→ 共享</p>
+</li>
+</ul>
+<h4 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h4>
+<p><img src="https://i.loli.net/2020/07/02/wHtaS9RNvJ4G13m.jpg" alt="假脱机技术06小结" /></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%83%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-17-请求分页 页面置换与分配">
+      <i class="fa fa-chevron-left"></i> OS-17-请求分页 页面置换与分配
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%80%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-11-管程与死锁">
+      OS-11-管程与死锁 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第二十二次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第二十二次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#io-软件层次"><span class="nav-number">1.1.</span> <span class="nav-text"> I&#x2F;O 软件层次</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#用户层软件"><span class="nav-number">1.1.1.</span> <span class="nav-text"> 用户层软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备独立性软件"><span class="nav-number">1.1.2.</span> <span class="nav-text"> 设备独立性软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备驱动程序"><span class="nav-number">1.1.3.</span> <span class="nav-text"> 设备驱动程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中断处理程序"><span class="nav-number">1.1.4.</span> <span class="nav-text"> 中断处理程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意事项"><span class="nav-number">1.1.5.</span> <span class="nav-text"> 注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#io-核心子系统"><span class="nav-number">1.2.</span> <span class="nav-text"> I&#x2F;O 核心子系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#io-调度"><span class="nav-number">1.2.1.</span> <span class="nav-text"> I&#x2F;O 调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备保护"><span class="nav-number">1.2.2.</span> <span class="nav-text"> 设备保护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#假脱机技术"><span class="nav-number">1.2.3.</span> <span class="nav-text"> 假脱机技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脱机技术"><span class="nav-number">1.2.3.1.</span> <span class="nav-text"> 脱机技术</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入输出井"><span class="nav-number">1.2.3.2.</span> <span class="nav-text"> 输入&#x2F;输出井</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入输出进程"><span class="nav-number">1.2.3.3.</span> <span class="nav-text"> 输入&#x2F;输出进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入输出缓冲区"><span class="nav-number">1.2.3.4.</span> <span class="nav-text"> 输入&#x2F;输出缓冲区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#共享打印机"><span class="nav-number">1.2.3.5.</span> <span class="nav-text"> 共享打印机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小结"><span class="nav-number">1.2.3.6.</span> <span class="nav-text"> 小结</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

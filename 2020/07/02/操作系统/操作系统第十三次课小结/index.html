@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32-T.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16-T.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="内存概念	链接与装入	覆盖与交换">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-13-内存">
+<meta property="og:url" content="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Tang&#39;s Blog">
+<meta property="og:description" content="内存概念	链接与装入	覆盖与交换">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/04/22/u9CwD5xTnZco4sR.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/22/1dQeyuNJ9BAtILK.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/04/22/VjxPKWlfvSLiE8F.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/04/22/cFsL2DWSNr5a7qV.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/22/E6SCDjckh8WoilF.jpg">
+<meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-02T06:47:18.251Z">
+<meta property="article:author" content="Tang">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/04/22/u9CwD5xTnZco4sR.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OS-13-内存 | Tang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Tang's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-留言">
+
+    <a href="/GuestBook/" rel="section"><i class="fa fa-paper-plane fa-fw"></i>留言</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/TangAvatar.jpg">
+      <meta itemprop="name" content="Tang">
+      <meta itemprop="description" content="tomorrow">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Tang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OS-13-内存
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-02 00:00:00 / 修改时间：14:47:18" itemprop="dateCreated datePublished" datetime="2020-07-02T00:00:00+08:00">2020-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Study/" itemprop="url" rel="index"><span itemprop="name">Study</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%B8%89%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">内存概念	链接与装入	覆盖与交换</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><ul class="markdownIt-TOC">
+<li><a href="#%E5%86%85%E5%AD%98">内存</a></li>
+<li><a href="#%E9%93%BE%E6%8E%A5%E4%B8%8E%E8%A3%85%E5%85%A5">链接与装入</a></li>
+<li><a href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%85%B3%E6%B3%A8%E7%82%B9">内存管理关注点</a>
+<ul>
+<li><a href="#%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%86%E9%85%8D%E5%92%8C%E5%9B%9E%E6%94%B6">内存空间的分配和回收</a></li>
+<li><a href="#%E7%A9%BA%E9%97%B4%E6%89%A9%E5%85%85">空间扩充</a></li>
+<li><a href="#%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2">地址转换</a></li>
+<li><a href="#%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4">内存保护</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+</ul>
+</li>
+<li><a href="#%E8%A6%86%E7%9B%96%E4%B8%8E%E4%BA%A4%E6%8D%A2">覆盖与交换</a>
+<ul>
+<li><a href="#%E8%A6%86%E7%9B%96%E6%8A%80%E6%9C%AF">覆盖技术</a></li>
+<li><a href="#%E4%BA%A4%E6%8D%A2%E6%8A%80%E6%9C%AF">交换技术</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93-2">小结</a></li>
+</ul>
+</li>
+</ul>
+</p>
+<h1 id="操作系统第十三次课小结"><a class="markdownIt-Anchor" href="#操作系统第十三次课小结"></a> 操作系统第十三次课小结</h1>
+<h2 id="内存"><a class="markdownIt-Anchor" href="#内存"></a> 内存</h2>
+<ol>
+<li>
+<p><strong>作用</strong>：用于存放数据的硬件，程序执行前<strong>先放入内存中才能</strong>被CPU处理</p>
+</li>
+<li>
+<p><strong>编址方式</strong></p>
+<ul>
+<li>按<strong>字节</strong>编址，每个存储单元大小为<strong>1个字节</strong>，即8个二进制位</li>
+<li>按<strong>字</strong>编址，每个存储单元大小为<strong>1个字</strong>，大小取决于<strong>计算机字长</strong></li>
+</ul>
+<blockquote>
+<p>一台设备有 4GB 内存</p>
+<p>指该内存中可以存放 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>4</mn><mo>×</mo><msup><mn>2</mn><mn>30</mn></msup></mrow><annotation encoding="application/x-tex">4 \times 2^{30}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">3</span><span class="mord mtight">0</span></span></span></span></span></span></span></span></span></span></span></span> 个字节，</p>
+<p>若是按字节编址则需要 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mn>32</mn></msup></mrow><annotation encoding="application/x-tex">2^{32}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">3</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span> 个地址来标识，故地址需要 32bit 来表示</p>
+</blockquote>
+</li>
+<li>
+<p>代码经编译生成指令才能被CPU识别，生成的指令中一般时使用<strong>逻辑地址</strong>（<strong>相对地址</strong>），因为程序每次运行开辟的空间<strong>位置不一定相同</strong>，固定地址会出错</p>
+<blockquote>
+<p>例如 编译时确定变量x的相对地址为100，则运行时CPU只需通过<strong>进程起始位置+100</strong>，即可获取到实际存放位置，而进程起始位置是会变化的</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="链接与装入"><a class="markdownIt-Anchor" href="#链接与装入"></a> 链接与装入</h2>
+<ol>
+<li>
+<p><strong>从写程序到程序运行</strong></p>
+<ul>
+<li>
+<p>编辑源代码文件</p>
+</li>
+<li>
+<p><strong>编译</strong>：<strong>编译程序</strong>将用户源代码编译成若干个<strong>目标模块</strong> (把高级语言<strong>翻译为机器语言</strong>)</p>
+</li>
+<li>
+<p><strong>链接</strong>：<strong>链接程序</strong>将一组<strong>目标模块</strong>及其需要的<strong>库函数</strong>链接在于一起，组成<strong>装入模块</strong>，<strong>此时多个模块各自的逻辑地址被组合成一个完整的逻辑地址</strong></p>
+</li>
+<li>
+<p><strong>装入</strong>（装载）：<strong>装入程序</strong>将装入模块装入<strong>内存</strong>运行，<strong>此时完整的逻辑地址被嵌入内存某位置而得到完整的物理地址</strong></p>
+<p><img src="https://i.loli.net/2020/04/22/u9CwD5xTnZco4sR.png" alt="" /></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>装入</strong></p>
+<ul>
+<li>将<strong>装入模块</strong>（可执行文件）<strong>放入内存</strong>，按模块自身的逻辑地址<strong>转化为</strong>内存中的<strong>物理地址</strong>  （其中，物理地址=起始地址+逻辑地址）</li>
+<li><strong>绝对装入</strong>
+<ul>
+<li>在编译时<strong>已知</strong>道程序将放入内存的具体位置，则<strong>编译程序直接生成带有绝对地址的装入模块</strong>，<strong>装入程序按</strong>模块中的<strong>地址</strong>放入<strong>指定位置</strong></li>
+<li>程序已知的绝对地址来源可以是<strong>编译或汇编时给出</strong>，也可以是<strong>程序员直接赋予</strong>。</li>
+<li>通常情况下都是在<strong>编译或汇编时</strong>转换</li>
+<li>只适合<strong>单道程序环境</strong></li>
+</ul>
+</li>
+<li><strong>静态重定位</strong>（可重定位装入）
+<ul>
+<li>编译链接后的装入模块地址都是<strong>从0开始的逻辑地址</strong></li>
+<li>再装入内存时，<strong>按</strong>装入的<strong>内存起始位置地址</strong>进行重定位，将逻辑地址计算转化为物理地址</li>
+<li>地址变换是在<strong>装入时一次性完成</strong></li>
+<li>装入内存时，<strong>必须一次性分配全部所需空间</strong>，若不足，则无法装入</li>
+<li>一旦装入内存，<strong>运行期间不可移动</strong>，空间不可申请扩充</li>
+</ul>
+</li>
+<li><strong>动态重定位</strong>（动态运行时装入）
+<ul>
+<li>装入模块地址<strong>从0开始的逻辑地址</strong></li>
+<li><strong>地址变换推迟到真正要执行时进行</strong>，装入内存后<strong>存储的</strong>地址<strong>仍是逻辑地址</strong></li>
+<li>需要一个<strong>重定位寄存器</strong>的支持，存放了装入模块在内存的<strong>起始地址</strong></li>
+<li>可将程序分配到不连续的存储区，根据需要<strong>动态申请分配内存</strong></li>
+<li><strong>允许程序在内存中发生移动</strong>，及时更改重定位寄存器的值即可</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>链接方式</strong></p>
+<ul>
+<li>链接过程<strong>合并目标模块</strong>，同时<strong>整合</strong>其各自的<strong>逻辑地址</strong></li>
+<li><strong>静态链接</strong>：将目标模块及所需库函数链接成一个<strong>装入模块</strong>（可执行文件），之后<strong>不再分开</strong></li>
+<li><strong>装入时动态链接</strong>：目标模块装入内存时，<strong>边装入边链接</strong></li>
+<li><strong>运行时动态链接</strong>：在<strong>运行中需要目标模块</strong>时才对其进行链接，<strong>便于更新修改</strong>，实现对目标模块的<strong>共享</strong></li>
+</ul>
+</li>
+<li>
+<p>小结</p>
+<p><img src="https://i.loli.net/2020/04/22/1dQeyuNJ9BAtILK.jpg" alt="" /></p>
+</li>
+</ol>
+<h2 id="内存管理关注点"><a class="markdownIt-Anchor" href="#内存管理关注点"></a> 内存管理关注点</h2>
+<h3 id="内存空间的分配和回收"><a class="markdownIt-Anchor" href="#内存空间的分配和回收"></a> 内存空间的分配和回收</h3>
+<ul>
+<li>进程应放到内存的哪个位置</li>
+<li>操作系统如何记录已分配和仍空闲的空间</li>
+<li>进程结束后如何收回空间</li>
+</ul>
+<h3 id="空间扩充"><a class="markdownIt-Anchor" href="#空间扩充"></a> 空间扩充</h3>
+<ul>
+<li><strong>虚拟化</strong>，把物理上较小的内存扩展为逻辑上较大的内存</li>
+</ul>
+<h3 id="地址转换"><a class="markdownIt-Anchor" href="#地址转换"></a> 地址转换</h3>
+<ul>
+<li>操作系统提供地址转换功能，负责程序的<strong>逻辑地址</strong>和内存的<strong>物理地址</strong>的转换</li>
+<li><strong>绝对装入</strong>：单道程序阶段，由<strong>编译器</strong>实现</li>
+<li><strong>静态重定位</strong>：<strong>装入时一次性</strong>转换，用于早期多道批处理操作系统</li>
+<li><strong>动态重定位</strong>：<strong>运行时转换</strong>，需要设置<strong>重定位寄存器</strong>，用于现代操作系统</li>
+</ul>
+<h3 id="内存保护"><a class="markdownIt-Anchor" href="#内存保护"></a> 内存保护</h3>
+<ul>
+<li>保证各进程在各自存储空间内运行，互不干扰</li>
+<li>方法一：CPU中设置<strong>上、下限寄存器</strong>，存放进程上下限地址，指令访问时检查是否越界</li>
+<li>方法二：采用<strong>重定向寄存器</strong>（<strong>基址寄存器</strong>，存放进程<strong>起始物理</strong>地址）和<strong>界地址寄存器</strong>（<strong>限长寄存器</strong>，存放进程<strong>最大逻辑</strong>地址），指令访问时先判断逻辑地址是否超出<strong>限长</strong>，未超出再进行<strong>重定位</strong>得到实际物理地址</li>
+</ul>
+<h3 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/04/22/VjxPKWlfvSLiE8F.jpg" alt="" /></p>
+<h2 id="覆盖与交换"><a class="markdownIt-Anchor" href="#覆盖与交换"></a> 覆盖与交换</h2>
+<h3 id="覆盖技术"><a class="markdownIt-Anchor" href="#覆盖技术"></a> 覆盖技术</h3>
+<ul>
+<li>
+<p>解决<strong>程序大小超过物理内存总和</strong>的问题</p>
+</li>
+<li>
+<p>程序分为<strong>多段</strong>（<strong>模块</strong>），常用段常驻内存，不常用的需要时才调用</p>
+</li>
+<li>
+<p><strong>一个固定区，若干个覆盖区</strong>，固定区调入后不再调出</p>
+</li>
+<li>
+<p>按照程序<strong>逻辑</strong>结构，让<strong>不同时被访问</strong>的程序段<strong>共享</strong>一个<strong>覆盖区</strong></p>
+<p><img src="https://i.loli.net/2020/04/22/cFsL2DWSNr5a7qV.png" alt="" /></p>
+</li>
+<li>
+<p><strong>必须由程序员声明覆盖结构</strong>，有操作系统自动完成覆盖</p>
+</li>
+<li>
+<p>缺点是<strong>对用户不透明</strong>，编程负担</p>
+</li>
+</ul>
+<h3 id="交换技术"><a class="markdownIt-Anchor" href="#交换技术"></a> 交换技术</h3>
+<ul>
+<li>内存空间紧张时，将某些进程暂时<strong>换出</strong>外存（<strong>挂起</strong>），把某些已具备运行条件的进程<strong>调入</strong>内存（<strong>唤醒激活</strong>） （<strong>进程在内存和磁盘间动态调度</strong>）</li>
+<li>中级调度（<strong>内存调度</strong>），决定哪个处于挂起状态的进程重新调入内存</li>
+<li><strong>磁盘</strong>空间分为<strong>文件区</strong>（存放文件，<strong>离散</strong>分配，追求<strong>利用率</strong>）和<strong>对换区</strong>（存放对换的<strong>进程数据</strong>，<strong>连续</strong>分配，追求<strong>速度</strong>），<strong>对换区的I/O速度比文件区更快</strong></li>
+<li>交换在<strong>内存吃紧</strong>（经常缺页）时进行，系统<strong>负荷降低</strong>（缺页率降低）时暂停</li>
+<li><strong>优先</strong>换出<strong>阻塞</strong>进程；<strong>优先级较低</strong>的进程；考虑进程在内存的<strong>驻留时间</strong></li>
+<li><strong>PCB会常驻内存，不会被换出</strong></li>
+</ul>
+<h3 id="小结-2"><a class="markdownIt-Anchor" href="#小结-2"></a> 小结</h3>
+<p><img src="https://i.loli.net/2020/04/22/E6SCDjckh8WoilF.jpg" alt="" /></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%94%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="prev" title="OS-15-分页存储管理">
+      <i class="fa fa-chevron-left"></i> OS-15-分页存储管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%8D%81%E4%BA%8C%E6%AC%A1%E8%AF%BE%E5%B0%8F%E7%BB%93/" rel="next" title="OS-12-死锁的预防、检测与解除">
+      OS-12-死锁的预防、检测与解除 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#操作系统第十三次课小结"><span class="nav-number">1.</span> <span class="nav-text"> 操作系统第十三次课小结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存"><span class="nav-number">1.1.</span> <span class="nav-text"> 内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链接与装入"><span class="nav-number">1.2.</span> <span class="nav-text"> 链接与装入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理关注点"><span class="nav-number">1.3.</span> <span class="nav-text"> 内存管理关注点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存空间的分配和回收"><span class="nav-number">1.3.1.</span> <span class="nav-text"> 内存空间的分配和回收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#空间扩充"><span class="nav-number">1.3.2.</span> <span class="nav-text"> 空间扩充</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#地址转换"><span class="nav-number">1.3.3.</span> <span class="nav-text"> 地址转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存保护"><span class="nav-number">1.3.4.</span> <span class="nav-text"> 内存保护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.3.5.</span> <span class="nav-text"> 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#覆盖与交换"><span class="nav-number">1.4.</span> <span class="nav-text"> 覆盖与交换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#覆盖技术"><span class="nav-number">1.4.1.</span> <span class="nav-text"> 覆盖技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交换技术"><span class="nav-number">1.4.2.</span> <span class="nav-text"> 交换技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结-2"><span class="nav-number">1.4.3.</span> <span class="nav-text"> 小结</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Tang"
+      src="/images/TangAvatar.jpg">
+  <p class="site-author-name" itemprop="name">Tang</p>
+  <div class="site-description" itemprop="description">tomorrow</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EastTang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EastTang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Tang</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">62k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">56 分钟</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'DJhivvvaLbHzkzj0FWDjuhXu-gzGzoHsz',
+      appKey     : '8lj465YKOLx6h65nFAiurjvc',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  
+    <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
